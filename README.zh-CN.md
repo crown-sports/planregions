@@ -1,10 +1,10 @@
 # PlanRegions
 
-[English](README.md) · [GitHub 发布版本](https://github.com/chrischen-coder/planregions/releases) · [完整验证与限制](docs/validation.md)
+[English](README.md) · [核心方法与论文](docs/methods.zh-CN.md) · [复现实跑笔记](docs/reproduction.zh-CN.md) · [完整验证](docs/validation.md) · [发布版本](https://github.com/chrischen-coder/planregions/releases)
 
-**当前状态：实验几何工具库。** 支持独立安装和无模型的几何划分，不提供生产系统整体质量等效承诺。相同旧墙体上的 PQ 差异区间跨零；新完整两阶段流程的 PQ 下降。真实数据、标注和外部属性模型均保持私有。
+一个房间的轮廓里可能有柱子和庭院，两个区域合并后，这些孔洞也应当留下。PlanRegions 从墙体掩码建立区域实例，让多边形、像素面积、区域内点和合并操作始终有同一份标签图可以核对。它可独立运行，也可读取 WallGraph 输出。
 
-从平面图墙体掩码提取区域实例，输出多边形、孔洞、面积、区域内点、属性和空间邻近图。可以独立运行，也可以读取 WallGraph 的标准输出。
+**当前状态：实验几何工具库。** 默认几何划分不需要神经模型，房间属性在缺少语义证据时保持未知。相同墙体输入的 PQ 改善尚不显著，新完整两阶段流程仍有退步；真实数据和外部模型保持私有。
 
 ## 背景与问题
 
@@ -58,7 +58,9 @@ planregions detect --walls /private/walls/walls.png \
 | 合并与拓扑混淆 | 合并保留墙体和孔洞；不相连区域可输出 MultiPolygon；语义冲突变为未知 | 这是实例分组，不是拆墙或证明房间可互通 |
 | 任意实例编号影响评估 | 使用 IoU 矩阵和一对一匹配评估实例 | 需要独立人工标注；不能用预测结果作为真值 |
 
-工程贡献在于一致的输入协议、显式的几何/语义边界、带孔区域输出和可审计的人工合并。连通域、分水岭、距离变换和 Hungarian 匹配均为已有方法。30 张带标注图的比较表明：相同旧墙体输入下的新几何 PQ 点估计略高，但统计区间跨零；新墙体加新区域的整体 PQ 下降，尚不能作为质量不降低的系统替代。见 [设计](docs/architecture.md) 与 [结果](docs/results.md)。
+核心工作集中在划分前排除外部、平坦距离平台的有效种子、孔洞保留和像素依据不变的显式合并。轮廓、分水岭和指派求解使用成熟库；PQ 借鉴 [Panoptic Segmentation](https://arxiv.org/abs/1801.00868)，同时明确本工程无类别、阈值包含等号等差异。[方法与论文](docs/methods.zh-CN.md) 将这些依据对应到源码。
+
+[复现实跑笔记](docs/reproduction.zh-CN.md) 讲清同一墙体对照的用途，以及外部泄漏、长房间重复播种和真实预测墙体上的过分割。30 张标注测试中，相同旧墙体的 PQ 差值区间跨零，新完整流程的 PQ 下降；这些结果也决定了默认继续使用连通域。见 [设计](docs/architecture.md) 与 [结果](docs/results.md)。
 
 ## 可替换策略
 

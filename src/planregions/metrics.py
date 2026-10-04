@@ -29,7 +29,7 @@ def region_metrics(predicted: np.ndarray, target: np.ndarray, threshold: float =
         - shared
     )
     scores = np.divide(shared, union, out=np.zeros(shared.shape, np.float64), where=union > 0)
-    # Maximize the number of threshold-qualified matches before their summed IoU.
+    # Qualified-match count dominates; IoU across all assigned pairs breaks ties.
     reward = (scores >= threshold) * (min(scores.shape, default=0) + 1) + scores
     rows, cols = linear_sum_assignment(-reward)
     matched = scores[rows, cols]

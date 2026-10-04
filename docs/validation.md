@@ -14,7 +14,7 @@ The wall threshold 0.5 and closing radius 2 were selected only on validation. Af
 
 ## Matching and accuracy
 
-Predictions and truth use original image coordinates. One-to-one Hungarian matching first maximizes matches with `IoU >= 0.5`, then total matched IoU. Matching is class-agnostic. Instance F1 is `TP / (TP + 0.5 FP + 0.5 FN)`; PQ replaces the numerator with summed matched IoU. This differs from strict `IoU > 0.5` or class-aware benchmarks. Macro averages images equally; micro aggregates instance counts and matched IoU.
+Predictions and truth use original image coordinates. SciPy's modified Jonker–Volgenant solver first maximizes matches with `IoU >= 0.5`, then total IoU across all assigned pairs, including subthreshold pairs. Only qualified pairs enter the metrics. Matching is class-agnostic. Instance F1 is `TP / (TP + 0.5 FP + 0.5 FN)`; PQ replaces the numerator with summed qualified IoU. This differs from strict `IoU > 0.5` or class-aware benchmarks. Macro averages images equally; micro aggregates instance counts and qualified IoU. See [methods](methods.md) for the objective and research lineage.
 
 All 30 test cases completed; no failures were dropped. The legacy region API retained its attribute model and geometry adjustments, while new default attributes were unknown. The same-wall row controls upstream wall input to distinguish geometry from the full pipeline.
 

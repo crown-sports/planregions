@@ -1,8 +1,8 @@
 # PlanRegions
 
-[中文](README.zh-CN.md) · [Design](docs/architecture.md) · [Validation](docs/validation.md) · [Releases](https://github.com/chrischen-coder/planregions/releases)
+[中文](README.zh-CN.md) · [Core methods and papers](docs/methods.md) · [Reproduction notes](docs/reproduction.md) · [Validation](docs/validation.md) · [Releases](https://github.com/chrischen-coder/planregions/releases)
 
-Turn an aligned floor-plan wall mask into region instances, polygons with holes, exact pixel areas, interior points, optional attributes, and a spatial proximity graph. Run it independently or consume the documented output of [WallGraph](https://github.com/chrischen-coder/wallgraph).
+A room outline may contain columns, courtyards, and obstacles. PlanRegions turns an aligned wall mask into region instances that retain those holes, with exact pixel areas, interior points, and explicit merge operations. Run it independently or use the documented output of [WallGraph](https://github.com/chrischen-coder/wallgraph).
 
 **Status: experimental geometry toolkit.** Geometry runs without a neural model. Region types remain unknown unless you provide semantic evidence. No real drawings, annotation datasets, or trained models are included; the demo generates a simple layout in memory.
 
@@ -12,7 +12,18 @@ Wall pixels do not directly answer how many regions exist or whether columns and
 
 PlanRegions separates barrier construction, partitioning, attribute assignment, and export. It excludes border-connected exterior before partitioning, retains polygon holes, and accepts explicit footprints or separator lines where the application supplies that evidence. Connected components are the default. Distance watershed is optional and can oversegment noisy predicted walls.
 
-Partition and attribute protocols, dependency injection, immutable configuration, and explicit merge operations make these choices inspectable. Connected components, watershed, contour hierarchy, distance transforms, and Hungarian matching are established techniques; the contribution is their independent engineering implementation and consistent contracts.
+Partition and attribute strategies are separate, so adding semantics does not silently redraw the regions. The instance map remains the common source for area, polygons, and merges. Configuration records which barriers and partition method were used.
+
+## Core technical choices
+
+| Choice | What it makes usable |
+| --- | --- |
+| Exterior exclusion before partitioning | Consistent outside handling, with explicit footprints for open boundaries |
+| One valid marker per maximum plateau | Fewer artificial seeds on flat room ridges; watershed remains optional because real predicted walls oversegment |
+| Pixel-driven polygons and explicit merging | Retained holes and barriers, recomputed geometry, and recorded ID mappings |
+| ID-independent instance evaluation | Compact IDs, background-aware intersection counts, and one-to-one assignment |
+
+The [method references](docs/methods.md) connect contour hierarchy to Suzuki's border-following work, watershed to the library's documented lineage, assignment to SciPy's Jonker–Volgenant variant, and PQ to [Panoptic Segmentation](https://arxiv.org/abs/1801.00868). They explain the differences from the original protocols. [Reproduction notes](docs/reproduction.md) describe exterior leakage, plateau seeds, same-wall controls, and the severe watershed oversegmentation seen in real tests. The contribution is the independent implementation and explicit geometry contracts.
 
 ## Install and run
 

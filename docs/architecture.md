@@ -35,6 +35,6 @@ A proximity graph expands instance distances up to a configured Euclidean radius
 
 ## Evaluation
 
-One pixel contingency pass builds the prediction/truth IoU matrix, including intersections with background when computing instance area. Sparse or unsigned instance IDs do not control matrix dimensions. Hungarian assignment first maximizes the number of threshold-valid matches and then their summed IoU.
+One pixel contingency pass builds the prediction/truth IoU matrix, including intersections with background when computing instance area. Sparse or unsigned instance IDs do not control matrix dimensions. SciPy's modified Jonker–Volgenant solver first maximizes the number of threshold-valid matches, then the total IoU across all assigned pairs, including subthreshold pairs. Only threshold-valid pairs enter F1/PQ. The reward and paper references are documented in [methods](methods.md).
 
 The default rule is class-agnostic `IoU >= 0.5`, which differs at the boundary from strict `IoU > 0.5` protocols. Reports expose instance F1 and PQ. Pixel coverage does not stand in for correct room counts, and semantic accuracy is not reported without semantic truth.

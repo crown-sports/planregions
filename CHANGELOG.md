@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Explain core technical choices, paper lineage, adaptation scope, and actual reproduction lessons in English and Chinese.
+- Clarify that one-to-one assignment uses SciPy's modified Jonker–Volgenant solver; measured matching rules and results remain unchanged.
+
 ## 0.1.1 — 2026-10-04
 
 Initial public experimental release.
