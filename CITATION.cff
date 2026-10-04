@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the repository and version."
+type: software
+title: PlanRegions
+authors:
+  - name: "PlanRegions contributors"
+version: 0.1.1
+date-released: 2026-10-04
+repository-code: "https://github.com/chrischen-coder/planregions"
+url: "https://github.com/chrischen-coder/planregions"
+license: MIT
+abstract: "Experimental floor-plan region geometry with explicit wall-mask contracts, hole-preserving polygons, pluggable semantics, merge operations, and instance evaluation."
