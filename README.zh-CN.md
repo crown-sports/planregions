@@ -48,7 +48,7 @@ planregions detect --walls /private/walls.png --output runs/regions
 
 本工程不提交任何数据图片。`demo` 在内存中生成一张简单三房间示意图，与 WallGraph 的公开简单图具有相同几何；它仅用于检查接口。真实图片、标注、模型、分类映射和逐张结果由使用者在仓库外管理。
 
-输入墙体掩码中 255 是墙、0 是背景。旧系统的黑墙白底图需显式使用 `--wall-value 0`。如果提供 `--wall-metadata walls.json`，会检查 WallGraph 的 schema、尺寸、坐标和墙体极性，避免把坐标错位的结果继续处理。
+输入墙体掩码中 255 是墙、0 是背景。旧系统的黑墙白底图需显式使用 `--wall-value 0`。如果提供 `--wall-metadata walls.json`，会检查 WallGraph 的 schema、尺寸、坐标约定和墙体极性，拒绝元数据声明不兼容的输入；实际像素对齐仍由调用方保证。
 
 ```bash
 # 安装 WallGraph 与 PlanRegions 后的两阶段联用
