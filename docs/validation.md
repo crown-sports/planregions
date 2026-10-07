@@ -47,3 +47,11 @@ The common accuracy runtime used Linux, Python 3.12.14, NumPy 1.26.4, OpenCV 4.1
 An earlier four-drawing run used one warmup and three calls per drawing, excluding upstream walls, I/O, model construction, and warmup. Region-only median/P95 was 41.76/232.51 ms; with an external CPU semantic model it was 741.66/1383.22 ms. Those 12 measurements used a different dependency environment and lacked a paired legacy timing control. They do not establish production tail latency, software speedup, or end-to-end P95.
 
 See [the detailed Chinese record](results.md) for historical timing and model-interface details. Further work needs opening/footprint evidence, finer-wall recall, independent business geometry and semantic truth, and a newly frozen holdout after future tuning.
+
+## 0.2.0 change-diagnosis checks — 2026-10-08
+
+Extraction and the above accuracy calculations are unchanged. The new `compare_regions` API and CLI diagnose correspondence between two aligned instance maps. Fifty local tests passed, including background flow, splits/merges, many-to-many correspondence, ID renumbering, maximum uint64 IDs, 20,000 independent regions, input-file link protection, and distinct review/input-error exits. An independent coordinate-set/DFS oracle agreed on 1,000 random small-array cases, seed 20261008.
+
+Three private saved cases, previously chosen for severe end-to-end regressions, completed comparison, pixel-accounting checks, and JSON round trips. Together their old/new maps had 52/11 instances, with five merge groups, five disappearances, one reorganization, and four reshaped groups. These are observations on a selected subset, not new accuracy scores or estimates of error frequency.
+
+Single comparison calls on those 3.61–6.95-million-pixel maps took 3.24–6.42 seconds locally, excluding file I/O. The macOS arm64 process used Python 3.12.12 and NumPy 2.5.3; its cumulative peak RSS was about 656 MiB including imports and sequential map loading. This was an engineering smoke check with no repeated latency benchmark. Sorting the explicit pixel-pair array still costs memory proportional to image size. See [comparison details and the generated one-pixel example](comparison.md); the [research roadmap](research-roadmap.md) separates validated diagnostics from proposed continuity training.

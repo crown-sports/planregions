@@ -1,9 +1,14 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-10-08
 
+- Add `compare_regions` and the `compare` CLI for many-to-many region correspondence and background pixel flow.
+- Report unchanged/reshaped regions, splits, merges, reorganizations, appearances, and disappearances without requiring truth or matching IDs.
+- Add explicit review gates, input-file protection, and distinct input-error/review exit codes.
+- Include a generated one-pixel-gap demonstration, bilingual use cases, and a continuity/opening research roadmap.
 - Explain core technical choices, paper lineage, adaptation scope, and actual reproduction lessons in English and Chinese.
 - Clarify that one-to-one assignment uses SciPy's modified Jonker–Volgenant solver; measured matching rules and results remain unchanged.
+- Use the current `crown-sports` repository URLs. Existing extraction, merging, and accuracy metrics are unchanged.
 
 ## 0.1.1 — 2026-10-04
 

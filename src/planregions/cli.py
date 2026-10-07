@@ -1,6 +1,7 @@
 import argparse
 import json
 from pathlib import Path
+from zipfile import BadZipFile
 
 import cv2
 import numpy as np
@@ -8,8 +9,9 @@ from PIL import Image
 
 from .attributes import ClassMapAttributes
 from .benchmark import benchmark
+from .compare import compare_regions
 from .config import RegionConfig
-from .evaluate import evaluate
+from .evaluate import evaluate, read_instances
 from .io import check_wall_contract, read_mask, read_result, save_result
 from .onnx_attributes import OnnxAttributes
 from .operations import merge_regions
@@ -49,7 +51,47 @@ def main() -> None:
     merge.add_argument("--input", type=Path, required=True)
     merge.add_argument("--groups", type=Path, required=True)
     merge.add_argument("--output", type=Path, required=True)
+    compare = commands.add_parser("compare", help="Trace changes between aligned instance maps")
+    compare.add_argument("--before", type=Path, required=True)
+    compare.add_argument("--after", type=Path, required=True)
+    compare.add_argument("--output", type=Path, required=True)
+    compare.add_argument(
+        "--fail-on",
+        nargs="+",
+        choices=("reshaped", "split", "merge", "reorganized", "appeared", "disappeared"),
+        default=[],
+        help="Write the report, then exit 1 if any chosen change kind occurs",
+    )
     args = parser.parse_args()
+    if args.command == "compare":
+        try:
+            inputs = (args.before, args.after)
+            same_path = args.output.resolve() in {path.resolve() for path in inputs}
+            same_file = args.output.exists() and any(args.output.samefile(path) for path in inputs)
+            before = read_instances(args.before)
+            after = read_instances(args.after)
+        except (ValueError, OSError, KeyError, TypeError, EOFError, BadZipFile) as error:
+            parser.error(f"cannot read comparison inputs: {error}")
+        if same_path or same_file:
+            parser.error("comparison output must differ from both input maps")
+        try:
+            report = compare_regions(before, after)
+        except ValueError as error:
+            parser.error(str(error))
+        selected = sorted(set(args.fail_on))
+        triggered = [kind for kind in selected if report["summary"]["group_counts"][kind]]
+        report["review_gate"] = {"fail_on": selected, "triggered": triggered}
+        try:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8"
+            )
+        except OSError as error:
+            parser.error(f"cannot write comparison report: {error}")
+        print(json.dumps({"summary": report["summary"], "review_gate": report["review_gate"]}))
+        if triggered:
+            raise SystemExit(1)
+        return
     if args.command == "merge":
         groups = json.loads(args.groups.read_text(encoding="utf-8"))
         result = merge_regions(read_result(args.input), groups)

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "planregions"
-version = "0.1.1"
+version = "0.2.0"
 description = "Floor-plan region partitioning, polygons and pluggable semantic attributes"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -17,10 +17,10 @@ onnx = ["onnxruntime>=1.20,<2"]
 dev = ["pytest>=8,<10", "ruff>=0.11,<1", "build>=1.2,<2"]
 
 [project.urls]
-Repository = "https://github.com/chrischen-coder/planregions"
-Issues = "https://github.com/chrischen-coder/planregions/issues"
-Documentation = "https://github.com/chrischen-coder/planregions/blob/main/README.md"
-Changelog = "https://github.com/chrischen-coder/planregions/blob/main/CHANGELOG.md"
+Repository = "https://github.com/crown-sports/planregions"
+Issues = "https://github.com/crown-sports/planregions/issues"
+Documentation = "https://github.com/crown-sports/planregions/blob/main/README.md"
+Changelog = "https://github.com/crown-sports/planregions/blob/main/CHANGELOG.md"
 
 [project.scripts]
 planregions = "planregions.cli:main"

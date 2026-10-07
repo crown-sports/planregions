@@ -5,7 +5,7 @@ Small fixes can be proposed directly as a pull request. For a larger change, ope
 ## Development
 
 ```bash
-git clone https://github.com/chrischen-coder/planregions.git
+git clone https://github.com/crown-sports/planregions.git
 cd planregions
 python -m venv .venv
 source .venv/bin/activate

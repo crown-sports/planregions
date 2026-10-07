@@ -1,8 +1,10 @@
 # PlanRegions
 
-[中文](README.zh-CN.md) · [Core methods and papers](docs/methods.md) · [Reproduction notes](docs/reproduction.md) · [Validation](docs/validation.md) · [Releases](https://github.com/chrischen-coder/planregions/releases)
+[中文](README.zh-CN.md) · [Use cases](docs/use-cases.md) · [Compare regions](docs/comparison.md) · [Research roadmap](docs/research-roadmap.md) · [Validation](docs/validation.md) · [Releases](https://github.com/crown-sports/planregions/releases)
 
-A room outline may contain columns, courtyards, and obstacles. PlanRegions turns an aligned wall mask into region instances that retain those holes, with exact pixel areas, interior points, and explicit merge operations. Run it independently or use the documented output of [WallGraph](https://github.com/chrischen-coder/wallgraph).
+A room outline may contain columns, courtyards, and obstacles. PlanRegions turns an aligned wall mask into region instances that retain those holes, with exact pixel areas, interior points, and explicit merge operations. Run it independently or use the documented output of [WallGraph](https://github.com/crown-sports/wallgraph).
+
+It also shows what changed between two runs: which regions merged, split, disappeared, or gained excluded pixels. Use it when building a drawing-review interface, testing a model upgrade, or inspecting manual edits. [Use cases](docs/use-cases.md) connect these capabilities to concrete tasks.
 
 **Status: experimental geometry toolkit.** Geometry runs without a neural model. Region types remain unknown unless you provide semantic evidence. No real drawings, annotation datasets, or trained models are included; the demo generates a simple layout in memory.
 
@@ -22,6 +24,7 @@ Partition and attribute strategies are separate, so adding semantics does not si
 | One valid marker per maximum plateau | Fewer artificial seeds on flat room ridges; watershed remains optional because real predicted walls oversegment |
 | Pixel-driven polygons and explicit merging | Retained holes and barriers, recomputed geometry, and recorded ID mappings |
 | ID-independent instance evaluation | Compact IDs, background-aware intersection counts, and one-to-one assignment |
+| Multi-to-multi change diagnosis | Trace overlap groups and background flow without needing ground truth or matching IDs |
 
 The [method references](docs/methods.md) connect contour hierarchy to Suzuki's border-following work, watershed to the library's documented lineage, assignment to SciPy's Jonker–Volgenant variant, and PQ to [Panoptic Segmentation](https://arxiv.org/abs/1801.00868). They explain the differences from the original protocols. [Reproduction notes](docs/reproduction.md) describe exterior leakage, plateau seeds, same-wall controls, and the severe watershed oversegmentation seen in real tests. The contribution is the independent implementation and explicit geometry contracts.
 
@@ -32,11 +35,24 @@ Requires Python 3.10 or newer. Releases are on GitHub; no PyPI package is curren
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install "git+https://github.com/chrischen-coder/planregions.git@v0.1.1"
+python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.2.0"
 planregions demo --output runs/demo
 ```
 
-Alternatively, install the wheel from [v0.1.1](https://github.com/chrischen-coder/planregions/releases/tag/v0.1.1). See [release instructions](docs/releasing.md) for SHA-256 verification. The demo produces three regions. The repository contains no image files; its in-memory geometry matches WallGraph's single generated demo drawing.
+Alternatively, install the wheel from [v0.2.0](https://github.com/crown-sports/planregions/releases/tag/v0.2.0). See [release instructions](docs/releasing.md) for SHA-256 verification. The demo produces three regions. The repository contains no image files; its in-memory geometry matches WallGraph's single generated demo drawing.
+
+## Find which regions changed
+
+Compare the integer outputs of two runs on the same original pixel grid:
+
+```bash
+planregions compare --before runs/before/labels.npz \
+  --after runs/after/labels.npz --output runs/review/changes.json
+```
+
+The report identifies unchanged or reshaped regions, splits, merges, many-to-many reorganizations, appearances, and disappearances. It also counts pixels entering or leaving background. Renumbering alone is unchanged. Add `--fail-on merge disappeared` to write the report and exit 1 when those observations need review. Invalid comparison inputs exit 2. Changes do not establish which prediction is correct.
+
+A [generated one-pixel example](docs/comparison.md#reproduce-the-one-pixel-example) retains wall IoU 0.98936 while two regions merge or one disappears. Run it locally to see why wall overlap and room structure need separate checks. The [comparison guide](docs/comparison.md) explains the exact overlap policy, report fields, and practical limits; the [research roadmap](docs/research-roadmap.md) sets out continuity and opening experiments.
 
 For your own binary mask:
 
@@ -90,7 +106,7 @@ Use `--footprint /private/footprint.png` for an application-supplied building fo
 An aligned class map or an external CPU ONNX adapter can assign attributes. Explicit class-name mapping and minimum majority coverage are required; the default does not infer room names from shape.
 
 ```bash
-python -m pip install "planregions[onnx] @ git+https://github.com/chrischen-coder/planregions.git@v0.1.1"
+python -m pip install "planregions[onnx] @ git+https://github.com/crown-sports/planregions.git@v0.2.0"
 planregions detect --walls /private/walls.png --image /private/plan.png \
   --attribute-model /private/attributes.onnx --class-names /private/class-names.json \
   --attribute-color rgb --min-coverage 0.6 --output runs/attributes

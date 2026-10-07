@@ -38,3 +38,7 @@ A proximity graph expands instance distances up to a configured Euclidean radius
 One pixel contingency pass builds the prediction/truth IoU matrix, including intersections with background when computing instance area. Sparse or unsigned instance IDs do not control matrix dimensions. SciPy's modified Jonker–Volgenant solver first maximizes the number of threshold-valid matches, then the total IoU across all assigned pairs, including subthreshold pairs. Only threshold-valid pairs enter F1/PQ. The reward and paper references are documented in [methods](methods.md).
 
 The default rule is class-agnostic `IoU >= 0.5`, which differs at the boundary from strict `IoU > 0.5` protocols. Reports expose instance F1 and PQ. Pixel coverage does not stand in for correct room counts, and semantic accuracy is not reported without semantic truth.
+
+## Change diagnosis
+
+`compare_regions` is a separate comparison service. Two aligned integer instance maps produce a sparse table of observed positive overlaps and per-instance background flow. A bipartite graph groups one-to-many, many-to-one, and many-to-many correspondences. Background never joins otherwise unrelated groups, and numerical ID changes alone do not alter geometry. Comparison leaves both inputs untouched and has no ground-truth requirement. It diagnoses observed changes; evaluation with independent truth remains a separate operation. See [the report contract and review gate](comparison.md).

@@ -6,4 +6,4 @@ Connected components, watershed, distance transforms, contour hierarchy, and one
 
 Aggregate evaluation used human annotations from [CubiCasa5k](https://github.com/CubiCasa/CubiCasa5k), distributed under CC BY-NC 4.0; no dataset images, annotations, sample lists, or legacy model weights are distributed here. That dataset license and any external model license are separate from this repository's MIT license. Model evaluation does not grant redistribution rights.
 
-MIT covers the new implementation in this repository. External weights, private data, and dependencies retain their existing terms. [WallGraph](https://github.com/chrischen-coder/wallgraph) is an optional upstream source, not a package dependency. PlanRegions includes no image assets; its demo geometry is generated in memory.
+MIT covers the new implementation in this repository. External weights, private data, and dependencies retain their existing terms. [WallGraph](https://github.com/crown-sports/wallgraph) is an optional upstream source, not a package dependency. PlanRegions includes no image assets; its demo geometry is generated in memory.

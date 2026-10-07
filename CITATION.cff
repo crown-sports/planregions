@@ -4,9 +4,9 @@ type: software
 title: PlanRegions
 authors:
   - name: "PlanRegions contributors"
-version: 0.1.1
-date-released: 2026-10-04
-repository-code: "https://github.com/chrischen-coder/planregions"
-url: "https://github.com/chrischen-coder/planregions"
+version: 0.2.0
+date-released: 2026-10-08
+repository-code: "https://github.com/crown-sports/planregions"
+url: "https://github.com/crown-sports/planregions"
 license: MIT
-abstract: "Experimental floor-plan region geometry with explicit wall-mask contracts, hole-preserving polygons, pluggable semantics, merge operations, and instance evaluation."
+abstract: "Experimental floor-plan region geometry with hole-preserving polygons, explicit merges, pluggable semantics, instance evaluation, and many-to-many region-change diagnosis."
