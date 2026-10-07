@@ -75,7 +75,7 @@ planregions detect --walls /private/walls/walls.png \
 
 核心工作集中在划分前排除外部、平坦距离平台的有效种子、孔洞保留和像素依据不变的显式合并。轮廓、分水岭和指派求解使用成熟库；PQ 借鉴 [Panoptic Segmentation](https://arxiv.org/abs/1801.00868)，同时明确本工程无类别、阈值包含等号等差异。[方法与论文](docs/methods.zh-CN.md) 将这些依据对应到源码。
 
-[复现实跑笔记](docs/reproduction.zh-CN.md) 讲清同一墙体对照的用途，以及外部泄漏、长房间重复播种和真实预测墙体上的过分割。30 张标注测试中，相同旧墙体的 PQ 差值区间跨零，新完整流程的 PQ 下降；这些结果也决定了默认继续使用连通域。见 [设计](docs/architecture.md) 与 [结果](docs/results.md)。
+[复现实跑笔记](docs/reproduction.zh-CN.md) 讲清同一墙体对照的用途，以及外部泄漏、长房间重复播种和真实预测墙体上的过分割。验证集比较决定默认使用连通域；冻结后的 30 张标注测试中，相同旧墙体的 PQ 差值区间跨零，新完整流程的 PQ 下降。见 [设计](docs/architecture.md) 与 [结果](docs/results.md)。
 
 ## 可替换策略
 

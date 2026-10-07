@@ -31,4 +31,6 @@ Generate checksums with `sha256sum` on Linux or `shasum -a 256` on macOS. Users 
 
 Tag the exact commit whose Python 3.10/3.12 CI passed. Create a draft experimental prerelease and attach only the three reviewed archives and checksum file. Check names, sizes, and SHA-256 digests, then publish the draft. Download the assets again and verify their hashes. Confirm the repository and release are public, the tag points to the validated commit, and the standalone install works.
 
+The checks workflow supports manual runs with `gh workflow run ci.yml --repo crown-sports/planregions --ref main`. Confirm that both Python jobs passed on the exact commit being released; a successful run on an older commit does not validate the release.
+
 CI uses read-only repository permissions and actions pinned by full commit SHA. Keep release permissions out of routine pull-request jobs. See [GitHub community guidance](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/about-community-profiles-for-public-repositories), [release management](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository), and [Actions security](https://docs.github.com/en/actions/reference/security/secure-use).
