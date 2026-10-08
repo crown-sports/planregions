@@ -1,10 +1,19 @@
 # PlanRegions
 
+**模型更新以后，哪些房间悄悄变了？**
+
+[打开交互演示](https://crown-sports.github.io/planregions/) · [本地复核自己的结果](docs/visual-review.zh-CN.md) · [项目介绍与宣传文案](docs/promotion.zh-CN.md)
+
+> 一个墙像素缺失，两个房间就合并了。
+> 在程序生成的示例中，墙体掩码 IoU 仍有 **98.94%**，区域数量却从 **2 变成 1**。安装前就能在浏览器切换内墙、外墙缺口，看到它们如何影响区域。这是受控几何演示，不代表真实识别精度。
+
 [English](README.md) · [使用场景](docs/use-cases.zh-CN.md) · [变化诊断](docs/comparison.zh-CN.md) · [研究路线](docs/research-roadmap.zh-CN.md) · [完整验证](docs/validation.md) · [发布版本](https://github.com/crown-sports/planregions/releases)
 
 一个房间的轮廓里可能有柱子和庭院，两个区域合并后，这些孔洞也应当留下。PlanRegions 从墙体掩码建立区域实例，让多边形、像素面积、区域内点和合并操作始终有同一份标签图可以核对。它可独立运行，也可读取 WallGraph 输出。
 
 它还可以比较两次结果，指出哪些区域合并、分裂或消失，以及哪些像素流入了背景。做图纸复核界面、验证模型升级或检查人工编辑时，这些具体变化能帮助你决定看哪里。接入方法见[使用场景](docs/use-cases.zh-CN.md)。
+
+0.3.0 可生成**本地交互 HTML 复核报告**：点击区域或变化组，同步突出前后对应，筛选合并与消失，直接看像素账目。比较不需要服务器或神经模型，生成的报告没有网络请求。
 
 **当前状态：实验几何工具库。** 默认几何划分不需要神经模型，房间属性在缺少语义证据时保持未知。相同墙体输入的 PQ 改善尚不显著，新完整两阶段流程仍有退步；真实数据和外部模型保持私有。
 
@@ -20,10 +29,13 @@ PlanRegions 将几何划分、语义赋值和结果导出分为独立模块。�
 
 ```bash
 planregions compare --before runs/before/labels.npz \
-  --after runs/after/labels.npz --output runs/review/changes.json
+  --after runs/after/labels.npz --output runs/review/changes.json \
+  --html-output runs/review/changes.html
 ```
 
 报告给出未变、形状变化、分裂、合并、多对多重组、出现和消失，并保留区域与背景之间的像素流量。单纯换编号不会算成变化。加上 `--fail-on merge disappeared`，程序会先保存报告，再在需要复核时退出 1；比较输入不合法时退出 2。变化本身不能说明哪一版更准确。
+
+用浏览器直接打开 `changes.html`。最近邻预览可能漏掉大图中的细小结构，统计仍使用完整分辨率结果。HTML 包含标签缩略图和逐区域统计，保存在自己的私有结果目录即可；详见[交互复核指南](docs/visual-review.zh-CN.md)。
 
 [一个墙像素的构造示例](docs/comparison.zh-CN.md#复现一个墙像素的影响)中，墙体 IoU 仍有 0.98936，两间区域却可能连成一间，或其中一间消失。你可以本地复现，查看具体编号和像素账目。[变化诊断说明](docs/comparison.zh-CN.md)解释完整契约；[研究路线](docs/research-roadmap.zh-CN.md)说明怎样继续验证墙体连续性和开口语义。
 
@@ -32,11 +44,11 @@ planregions compare --before runs/before/labels.npz \
 从 GitHub 安装已发布的版本：
 
 ```bash
-python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.2.0"
+python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.3.0"
 planregions demo --output runs/demo
 ```
 
-也可下载 [Release 中的 wheel](https://github.com/crown-sports/planregions/releases/tag/v0.2.0) 并校验 SHA256。以下开发安装命令在克隆本仓库后执行：
+也可下载 [Release 中的 wheel](https://github.com/crown-sports/planregions/releases/tag/v0.3.0) 并校验 SHA256。以下开发安装命令在克隆本仓库后执行：
 
 ```bash
 python -m venv .venv

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 — 2026-10-08
+
+- Add a self-contained local HTML change-review report with synchronized label previews, change filters, selection and full-resolution pixel accounting.
+- Keep large label IDs exact in browser payloads, bound preview size, and preserve CLI input/output alias protection and review exit codes.
+- Add a browser demonstration generated through the production comparison and renderer, checked against the implementation in CI.
+- Present concrete integrations and bilingual project introductions; extraction and accuracy metrics remain unchanged.
+
 ## 0.2.0 — 2026-10-08
 
 - Add `compare_regions` and the `compare` CLI for many-to-many region correspondence and background pixel flow.

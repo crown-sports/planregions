@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "planregions"
-version = "0.2.0"
-description = "Floor-plan region partitioning, polygons and pluggable semantic attributes"
+version = "0.3.0"
+description = "Floor-plan region geometry, change diagnosis and local visual review"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"

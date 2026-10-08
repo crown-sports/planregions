@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="See why one wall pixel can merge two rooms. Try PlanRegions' generated example, then compare your own aligned region maps in a local visual report.">
+  <meta name="color-scheme" content="light">
+  <title>PlanRegions — See which rooms changed</title>
+  <style>
+    :root { --paper: #f8f6ef; --ink: #142d3c; --muted: #52636b; --line: #d9dfd8; --teal: #08776b; --soft: #e4f1e9; --white: #fffefa; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.6; }
+    a { color: inherit; text-underline-offset: 4px; }
+    button { font: inherit; cursor: pointer; }
+    a:focus-visible, button:focus-visible, pre:focus-visible { outline: 3px solid var(--teal); outline-offset: 5px; }
+    .wrap { width: min(1180px, calc(100% - 48px)); margin: 0 auto; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 26px 0; border-bottom: 1px solid var(--line); }
+    .brand { display: inline-flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 750; text-decoration: none; letter-spacing: -.6px; }
+    .brand-mark { width: 26px; height: 26px; border: 3px solid var(--ink); background: var(--soft); box-shadow: inset -9px 0 var(--teal); }
+    nav { display: flex; align-items: center; gap: 20px; font-size: 14px; }
+    .language { background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 7px; padding: 5px 10px; }
+    .hero { padding: 72px 0 44px; position: relative; }
+    .eyebrow { margin: 0 0 17px; color: var(--teal); font-size: 12px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0; max-width: 930px; font-size: clamp(40px, 6.8vw, 78px); line-height: 1.1; letter-spacing: -.055em; font-weight: 760; }
+    h1 span { display: block; }
+    .accent { color: var(--teal); }
+    .intro { max-width: 760px; color: var(--muted); font-size: 19px; line-height: 1.7; margin: 24px 0 23px; }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+    .button { display: inline-flex; justify-content: center; align-items: center; min-height: 45px; border: 1px solid var(--ink); border-radius: 8px; padding: 9px 18px; font-size: 14px; font-weight: 650; text-decoration: none; background: var(--ink); color: white; }
+    .button.secondary { background: transparent; color: var(--ink); border-color: var(--line); }
+    .quiet { color: var(--muted); font-size: 13px; margin: 13px 0 0; }
+    .demo { border: 1px solid var(--line); border-radius: 17px; overflow: hidden; background: var(--white); box-shadow: 0 18px 45px #142d3c08; }
+    .demo-heading { padding: 24px 28px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 14px; align-items: center; }
+    h2 { margin: 0; font-size: 27px; letter-spacing: -.035em; line-height: 1.3; }
+    .badge { background: var(--soft); color: #176355; border: 1px solid #c9dfd3; border-radius: 50px; padding: 6px 12px; font-size: 12px; font-weight: 650; }
+    .demo-grid { display: grid; grid-template-columns: 295px minmax(0, 1fr); }
+    .case-panel { padding: 26px 24px; border-right: 1px solid var(--line); }
+    .case-tabs { display: grid; gap: 9px; }
+    .case-tabs button { padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: transparent; text-align: left; font-size: 14px; font-weight: 650; }
+    .case-tabs button[aria-pressed="true"] { background: var(--soft); border-color: var(--teal); color: var(--teal); }
+    .case-note { margin: 21px 0; font-size: 14px; color: var(--muted); min-height: 91px; }
+    dl { margin: 0; }
+    .metric { padding: 13px 0; border-top: 1px solid var(--line); }
+    dt { font-size: 12px; color: var(--muted); }
+    dd { margin: 3px 0 0; font-size: 24px; font-weight: 750; letter-spacing: -.035em; }
+    .metric.detail dd { font-size: 18px; }
+    .frame-panel { min-width: 0; background: #ffffff; }
+    iframe { display: block; border: 0; width: 100%; height: 690px; background: #ffffff; }
+    .frame-help { margin: 0; border-top: 1px solid var(--line); padding: 12px 22px; font-size: 12px; color: var(--muted); }
+    .scope { padding: 19px 28px; background: #f1f3ed; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; margin: 0; }
+    .scope strong { color: var(--ink); }
+    .section { padding: 65px 0 0; }
+    .section-lead { max-width: 760px; color: var(--muted); margin: 14px 0 25px; font-size: 16px; }
+    .benefits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .benefit { padding: 23px 25px; background: var(--white); border: 1px solid var(--line); border-radius: 12px; }
+    .number { color: var(--teal); font-size: 12px; font-weight: 750; letter-spacing: .12em; }
+    h3 { margin: 12px 0 8px; font-size: 18px; line-height: 1.35; letter-spacing: -.025em; }
+    .benefit p { color: var(--muted); font-size: 14px; margin: 0; }
+    .command-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 18px; }
+    .command-box { background: var(--ink); color: #edf4ee; border-radius: 12px; overflow: hidden; min-width: 0; }
+    .command-title { display: flex; align-items: center; justify-content: space-between; padding: 15px 19px; border-bottom: 1px solid #ffffff25; gap: 15px; font-size: 14px; }
+    .copy { background: #ffffff10; border: 1px solid #ffffff35; color: white; border-radius: 6px; font-size: 12px; padding: 4px 10px; }
+    pre { padding: 19px; margin: 0; overflow-x: auto; font-size: 12px; line-height: 1.9; tab-size: 2; }
+    code { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; }
+    .copy-status { color: var(--muted); font-size: 13px; min-height: 23px; margin: 11px 0 0; }
+    .contract { margin-top: 18px; padding-left: 16px; border-left: 3px solid #b7cfc2; color: var(--muted); font-size: 14px; }
+    .contract p { margin: 5px 0; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .project { border: 1px solid var(--line); border-radius: 12px; padding: 27px; background: var(--white); }
+    .project h3 { margin: 8px 0 12px; font-size: 23px; }
+    .project p { color: var(--muted); font-size: 15px; margin: 0 0 18px; }
+    .project a { font-size: 14px; font-weight: 650; color: var(--teal); }
+    footer { margin-top: 66px; padding: 27px 0 37px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 15px; font-size: 12px; color: var(--muted); }
+    footer a + a { margin-left: 17px; }
+    @media (max-width: 800px) { .wrap { width: calc(100% - 30px); } .hero { padding-top: 47px; } .intro { font-size: 17px; } .demo-grid { grid-template-columns: 1fr; } .case-panel { border-right: 0; border-bottom: 1px solid var(--line); } .case-tabs { grid-template-columns: 1fr 1fr; } .case-note { min-height: 0; } dl { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 20px; } iframe { height: 790px; } .benefits { grid-template-columns: 1fr; } .command-grid, .pair { grid-template-columns: 1fr; } .section { padding-top: 45px; } }
+    @media (max-width: 420px) { nav { gap: 12px; } header { gap: 10px; } .brand { font-size: 18px; gap: 8px; } .brand-mark { width: 22px; height: 22px; } .demo-heading, .scope { padding: 20px; } .case-panel { padding: 20px; } h1 { font-size: 42px; } iframe { height: 900px; } .badge { font-size: 11px; } }
+    @media (prefers-reduced-motion: no-preference) { .button, .case-tabs button { transition: background .15s, border-color .15s; } .button:hover { background: #234756; } .button.secondary:hover { background: var(--soft); } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="./" aria-label="PlanRegions home"><span class="brand-mark" aria-hidden="true"></span>PlanRegions</a>
+      <nav aria-label="Main navigation">
+        <a href="https://github.com/crown-sports/planregions">GitHub</a>
+        <button class="language" id="language" type="button" aria-label="Switch to Chinese">中文</button>
+      </nav>
+    </header>
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <p class="eyebrow" data-i18n="eyebrow">A closer look at floor-plan changes</p>
+        <h1 id="hero-title"><span data-i18n="headline">One pixel.</span><span class="accent" data-i18n="headlineAccent">Two rooms become one.</span></h1>
+        <p class="intro" data-i18n="intro">A tiny wall gap can merge two regions or connect an interior to the outside. PlanRegions shows which regions changed between two runs, and where to inspect them.</p>
+        <div class="actions">
+          <a class="button" href="#demo" data-i18n="tryDemo">Try the generated example</a>
+          <a class="button secondary" href="https://github.com/crown-sports/planregions" data-i18n="source">Get the source on GitHub</a>
+        </div>
+        <p class="quiet" data-i18n="heroNote">The browser example needs no install, GPU, or model download.</p>
+      </section>
+
+      <section class="demo" id="demo" aria-labelledby="demo-title">
+        <div class="demo-heading">
+          <h2 id="demo-title" data-i18n="demoTitle">A small edit. A visible consequence.</h2>
+          <span class="badge" data-i18n="exampleBadge">Generated geometry example</span>
+        </div>
+        <div class="demo-grid">
+          <aside class="case-panel" aria-label="Generated cases">
+            <div class="case-tabs" aria-label="Choose a generated case">
+              <button type="button" data-case="inner" aria-pressed="true" data-i18n="innerButton">1 · Inner-wall gap</button>
+              <button type="button" data-case="outer" aria-pressed="false" data-i18n="outerButton">2 · Outer-wall gap</button>
+            </div>
+            <p class="case-note" id="case-note">Remove one pixel from the dividing wall. Two enclosed regions become one merge group.</p>
+            <dl>
+              <div class="metric"><dt data-i18n="wallPixels">Wall pixels</dt><dd>94 → 93</dd></div>
+              <div class="metric"><dt data-i18n="wallIoU">Before/after wall-mask IoU</dt><dd>98.94%</dd></div>
+              <div class="metric"><dt data-i18n="regionCount">Region count</dt><dd>2 → 1</dd></div>
+              <div class="metric detail"><dt id="flow-label">New region pixels</dt><dd id="flow-value">1 px</dd></div>
+            </dl>
+          </aside>
+          <div class="frame-panel">
+            <iframe id="report" src="demo/inner.html" sandbox="allow-scripts" title="Generated inner-wall gap comparison report" loading="lazy"></iframe>
+            <p class="frame-help"><span data-i18n="frameHelp">Use the report controls to inspect a change group.</span> <a id="full-report" href="demo/inner.html" target="_blank" rel="noopener" data-i18n="openReport">Open the full report</a></p>
+          </div>
+        </div>
+        <p class="scope"><strong data-i18n="scopeLead">This is not an accuracy benchmark.</strong> <span data-i18n="scopeText">The 20 × 30 layout is generated by code. These examples explain the effect of a wall gap; they do not measure a trained model or represent real drawings.</span></p>
+      </section>
+
+      <section class="section" aria-labelledby="value-title">
+        <h2 id="value-title" data-i18n="valueTitle">Make a model change reviewable.</h2>
+        <p class="section-lead" data-i18n="valueIntro">Use your own aligned instance maps to turn an upgrade, a threshold change, or a manual edit into a concrete review.</p>
+        <div class="benefits">
+          <article class="benefit"><span class="number">01</span><h3 data-i18n="benefit1Title">Find the affected regions</h3><p data-i18n="benefit1Text">Inspect merges, splits, disappearances, and pixels entering or leaving excluded space. Instance IDs can differ between runs.</p></article>
+          <article class="benefit"><span class="number">02</span><h3 data-i18n="benefit2Title">Open a local visual report</h3><p data-i18n="benefit2Text">Generate a self-contained HTML report from your label maps. Keep your drawings and derived reports in your own workspace.</p></article>
+          <article class="benefit"><span class="number">03</span><h3 data-i18n="benefit3Title">Request review in a pipeline</h3><p data-i18n="benefit3Text">Add --fail-on merge disappeared to write the report and exit 1 when a selected change occurs. The gate requests inspection, not a verdict on accuracy.</p></article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="start-title">
+        <h2 id="start-title" data-i18n="startTitle">Bring your two label maps.</h2>
+        <p class="section-lead" data-i18n="startIntro">Install PlanRegions v0.3.0 in your Python environment, then compare two runs. Python 3.10 or newer is required. Releases are on GitHub; no PyPI package is currently published.</p>
+        <div class="command-grid">
+          <div class="command-box"><div class="command-title"><span data-i18n="installTitle">Install the tagged source</span><button class="copy" type="button" data-copy="install-command" data-i18n="copy">Copy</button></div><pre tabindex="0"><code id="install-command">python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.3.0"</code></pre></div>
+          <div class="command-box"><div class="command-title"><span data-i18n="compareTitle">Write JSON and a local HTML report</span><button class="copy" type="button" data-copy="compare-command" data-i18n="copy">Copy</button></div><pre tabindex="0"><code id="compare-command">planregions compare --before runs/before/labels.npz \
+  --after runs/after/labels.npz --output runs/review/changes.json \
+  --html-output runs/review/changes.html</code></pre></div>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+        <div class="contract">
+          <p data-i18n="contract1">Both maps must use the same original pixel grid. Equal image dimensions alone do not establish alignment. Use integer labels, not color previews.</p>
+          <p data-i18n="contract2">Every positive pixel overlap contributes to the correspondence. Small boundary shifts can join a group; examine the pixel counts. Changes alone do not tell you which result is correct.</p>
+        </div>
+        <p class="quiet"><a href="https://github.com/crown-sports/planregions/blob/main/docs/comparison.md" data-i18n="comparisonGuide">Comparison guide</a> · <a href="https://github.com/crown-sports/planregions/releases/tag/v0.3.0" data-i18n="release">v0.3.0 release and checksums</a></p>
+      </section>
+
+      <section class="section" aria-labelledby="projects-title">
+        <h2 id="projects-title" data-i18n="projectsTitle">Two tools. Clear handoffs.</h2>
+        <p class="section-lead" data-i18n="projectsIntro">Start from the output you already have. Each package works independently, and their documented mask contract connects them.</p>
+        <div class="pair">
+          <article class="project"><span class="eyebrow">WallGraph · v0.1.2</span><h3 data-i18n="wallgraphTitle">Wall predictions → connection graphs</h3><p data-i18n="wallgraphText">Connect an existing wall model and carry its predictions into original-coordinate polylines, junctions, and loops. Model adapters and geometry stages are replaceable.</p><a href="https://github.com/crown-sports/wallgraph" data-i18n="wallgraphLink">Explore WallGraph</a></article>
+          <article class="project"><span class="eyebrow">PlanRegions · v0.3.0</span><h3 data-i18n="planregionsTitle">Wall masks → regions you can inspect</h3><p data-i18n="planregionsText">Keep polygon holes, exact pixel areas, and explicit region merges. Compare two outputs in a visual report, with no neural model required for geometry.</p><a href="https://github.com/crown-sports/planregions" data-i18n="planregionsLink">Explore PlanRegions</a></article>
+        </div>
+        <p class="quiet" data-i18n="limits">Both projects are experimental. No real datasets or pretrained weights are distributed. WallGraph requires your own compatible model for real drawings; region changes do not establish semantic correctness.</p>
+      </section>
+    </main>
+    <footer>
+      <span data-i18n="footer">Independent engineering tools · MIT · Generated demo only</span>
+      <div><a href="https://github.com/crown-sports/planregions/blob/main/docs/validation.md" data-i18n="validation">Measured results and limits</a><a href="https://github.com/crown-sports/planregions/blob/main/docs/research-roadmap.md" data-i18n="research">Research roadmap</a></div>
+    </footer>
+  </div>
+  <script>
+    const copy = {
+      en: {
+        eyebrow: "A closer look at floor-plan changes", headline: "One pixel.", headlineAccent: "Two rooms become one.",
+        intro: "A tiny wall gap can merge two regions or connect an interior to the outside. PlanRegions shows which regions changed between two runs, and where to inspect them.",
+        tryDemo: "Try the generated example", source: "Get the source on GitHub", heroNote: "The browser example needs no install, GPU, or model download.",
+        demoTitle: "A small edit. A visible consequence.", exampleBadge: "Generated geometry example", innerButton: "1 · Inner-wall gap", outerButton: "2 · Outer-wall gap",
+        wallPixels: "Wall pixels", wallIoU: "Before/after wall-mask IoU", regionCount: "Region count", frameHelp: "Use the report controls to inspect a change group.", openReport: "Open the full report",
+        scopeLead: "This is not an accuracy benchmark.", scopeText: "The 20 × 30 layout is generated by code. These examples explain the effect of a wall gap; they do not measure a trained model or represent real drawings.",
+        valueTitle: "Make a model change reviewable.", valueIntro: "Use your own aligned instance maps to turn an upgrade, a threshold change, or a manual edit into a concrete review.",
+        benefit1Title: "Find the affected regions", benefit1Text: "Inspect merges, splits, disappearances, and pixels entering or leaving excluded space. Instance IDs can differ between runs.",
+        benefit2Title: "Open a local visual report", benefit2Text: "Generate a self-contained HTML report from your label maps. Keep your drawings and derived reports in your own workspace.",
+        benefit3Title: "Request review in a pipeline", benefit3Text: "Add --fail-on merge disappeared to write the report and exit 1 when a selected change occurs. The gate requests inspection, not a verdict on accuracy.",
+        startTitle: "Bring your two label maps.", startIntro: "Install PlanRegions v0.3.0 in your Python environment, then compare two runs. Python 3.10 or newer is required. Releases are on GitHub; no PyPI package is currently published.",
+        installTitle: "Install the tagged source", compareTitle: "Write JSON and a local HTML report", copy: "Copy", copied: "Command copied.", copyFallback: "Automatic copying is unavailable here. Select and copy the command shown above.",
+        contract1: "Both maps must use the same original pixel grid. Equal image dimensions alone do not establish alignment. Use integer labels, not color previews.",
+        contract2: "Every positive pixel overlap contributes to the correspondence. Small boundary shifts can join a group; examine the pixel counts. Changes alone do not tell you which result is correct.",
+        comparisonGuide: "Comparison guide", release: "v0.3.0 release and checksums", projectsTitle: "Two tools. Clear handoffs.", projectsIntro: "Start from the output you already have. Each package works independently, and their documented mask contract connects them.",
+        wallgraphTitle: "Wall predictions → connection graphs", wallgraphText: "Connect an existing wall model and carry its predictions into original-coordinate polylines, junctions, and loops. Model adapters and geometry stages are replaceable.", wallgraphLink: "Explore WallGraph",
+        planregionsTitle: "Wall masks → regions you can inspect", planregionsText: "Keep polygon holes, exact pixel areas, and explicit region merges. Compare two outputs in a visual report, with no neural model required for geometry.", planregionsLink: "Explore PlanRegions",
+        limits: "Both projects are experimental. No real datasets or pretrained weights are distributed. WallGraph requires your own compatible model for real drawings; region changes do not establish semantic correctness.",
+        footer: "Independent engineering tools · MIT · Generated demo only", validation: "Measured results and limits", research: "Research roadmap",
+        innerNote: "Remove one pixel from the dividing wall. Two enclosed regions become one merge group.", outerNote: "Remove one pixel from the outer wall. One region connects to the image boundary and is excluded as exterior.",
+        innerFlow: "New region pixels", outerFlow: "Region pixels sent to background", innerTitle: "Generated inner-wall gap comparison report", outerTitle: "Generated outer-wall gap comparison report", pageTitle: "PlanRegions — See which rooms changed"
+      },
+      zh: {
+        eyebrow: "直观看见图纸中的空间变化", headline: "一个像素，", headlineAccent: "两个房间就合并了。",
+        intro: "一处细小的墙体缺口，可能让两个区域连成一个，或让内部空间连到外部。PlanRegions 比较两次输出，指出哪些区域改变，以及变化发生在哪里。",
+        tryDemo: "体验程序生成的示例", source: "在 GitHub 获取源码", heroNote: "浏览器示例无需安装、显卡或模型下载。",
+        demoTitle: "一个小改动，空间结果就变了。", exampleBadge: "程序生成的几何示例", innerButton: "1 · 内墙缺口", outerButton: "2 · 外墙缺口",
+        wallPixels: "墙体像素", wallIoU: "前后墙体掩码 IoU", regionCount: "区域数量", frameHelp: "使用报告内的控件查看变化组。", openReport: "打开完整报告",
+        scopeLead: "这不是识别精度评测。", scopeText: "20 × 30 的布局由代码生成。这两个示例解释墙体缺口带来的变化，不衡量训练模型，也不代表真实图纸。",
+        valueTitle: "模型换了，变化可以逐处复核。", valueIntro: "使用自己的两张对齐实例图，检查模型升级、阈值调整或人工修改对具体区域的影响。",
+        benefit1Title: "找到受影响的区域", benefit1Text: "查看合并、分裂、消失，以及像素进入或离开排除空间的情况。两次输出的实例 ID 可以不同。",
+        benefit2Title: "打开本地可视化报告", benefit2Text: "由标签图生成自包含 HTML 报告，直接在浏览器查看。图纸与衍生报告保留在自己的工作目录。",
+        benefit3Title: "让流水线提示人工复核", benefit3Text: "添加 --fail-on merge disappeared，指定变化发生时先写出报告，再以退出码 1 提示复核。触发条件不代表识别错误。",
+        startTitle: "带上自己的两张标签图。", startIntro: "在 Python 环境安装 PlanRegions v0.3.0，然后比较两次输出。需要 Python 3.10 或更新版本。安装包发布在 GitHub，当前没有 PyPI 包。",
+        installTitle: "安装固定版本源码", compareTitle: "生成 JSON 与本地 HTML 报告", copy: "复制", copied: "命令已复制。", copyFallback: "当前环境无法自动复制，请选中并复制上方命令。",
+        contract1: "两张图必须使用同一原图像素网格。尺寸相同不代表已经对齐。请使用整数标签图，不要使用彩色预览。",
+        contract2: "每个正值像素重叠都会参与对应关系。微小边界偏移也可能连成一个变化组，需要结合像素计数检查。变化本身不能判断哪个结果正确。",
+        comparisonGuide: "比较使用指南", release: "v0.3.0 发布与校验文件", projectsTitle: "两个工具，输入输出衔接清楚。", projectsIntro: "从已有输出开始。两个包都能独立使用，也能通过明确的墙体掩码约定衔接。",
+        wallgraphTitle: "墙体预测 → 墙线与连接图", wallgraphText: "接入已有墙体模型，输出原图坐标中的折线、交点与闭环。模型适配器和几何处理阶段可以分别替换。", wallgraphLink: "了解 WallGraph",
+        planregionsTitle: "墙体掩码 → 可检查的区域", planregionsText: "保留多边形孔洞、精确像素面积和显式区域合并。用可视化报告比较两次输出，几何处理无需神经网络模型。", planregionsLink: "了解 PlanRegions",
+        limits: "两个项目均处于实验阶段，不分发真实数据集或预训练权重。WallGraph 处理真实图纸需要自行提供兼容模型；区域变化不能证明语义识别正确。",
+        footer: "独立实现的工程工具 · MIT · 仅含生成示例", validation: "真实评测与局限", research: "研究路线",
+        innerNote: "从分隔墙移除一个像素，原来的两个封闭区域连成一个合并组。", outerNote: "从外墙移除一个像素，一个区域连接到图像边界，被作为外部空间排除。",
+        innerFlow: "新增区域像素", outerFlow: "进入背景的区域像素", innerTitle: "程序生成的内墙缺口比较报告", outerTitle: "程序生成的外墙缺口比较报告", pageTitle: "PlanRegions — 看见哪些区域变了"
+      }
+    };
+    let language = "en";
+    let currentCase = "inner";
+    function showCase(name, reload = true) {
+      currentCase = name;
+      document.querySelectorAll("[data-case]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.case === name)));
+      document.getElementById("case-note").textContent = copy[language][name + "Note"];
+      document.getElementById("flow-label").textContent = copy[language][name + "Flow"];
+      document.getElementById("flow-value").textContent = name === "inner" ? "1 px" : "168 px";
+      const report = document.getElementById("report");
+      if (reload) report.src = "demo/" + name + ".html";
+      report.title = copy[language][name + "Title"];
+      document.getElementById("full-report").href = "demo/" + name + ".html";
+    }
+    document.querySelectorAll("[data-case]").forEach(button => button.addEventListener("click", () => showCase(button.dataset.case)));
+    document.getElementById("language").addEventListener("click", () => {
+      language = language === "en" ? "zh" : "en";
+      document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
+      document.title = copy[language].pageTitle;
+      document.querySelectorAll("[data-i18n]").forEach(element => { element.textContent = copy[language][element.dataset.i18n]; });
+      const toggle = document.getElementById("language");
+      toggle.textContent = language === "en" ? "中文" : "EN";
+      toggle.setAttribute("aria-label", language === "en" ? "Switch to Chinese" : "Switch to English");
+      document.getElementById("copy-status").textContent = "";
+      showCase(currentCase, false);
+    });
+    document.querySelectorAll("[data-copy]").forEach(button => button.addEventListener("click", async () => {
+      const command = document.getElementById(button.dataset.copy);
+      const status = document.getElementById("copy-status");
+      try {
+        if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error("Clipboard unavailable");
+        await navigator.clipboard.writeText(command.textContent);
+        status.textContent = copy[language].copied;
+      } catch (_) {
+        status.textContent = copy[language].copyFallback;
+        command.closest("pre").focus();
+      }
+    }));
+  </script>
+</body>
+</html>

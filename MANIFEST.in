@@ -3,7 +3,7 @@ include README.zh-CN.md CODE_OF_CONDUCT.md SECURITY.md CHANGELOG.md CITATION.cff
 include .github/PULL_REQUEST_TEMPLATE.md
 recursive-include src/planregions *.py
 recursive-include tests *.py
-recursive-include docs *.md
+recursive-include docs *.md *.html
 recursive-include tools *.py
 recursive-include .github/workflows *.yml *.yaml
 recursive-include .github/ISSUE_TEMPLATE *.yml *.yaml

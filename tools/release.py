@@ -35,7 +35,7 @@ def public_files() -> list[Path]:
         ("src", {".py"}),
         ("tests", {".py"}),
         ("tools", {".py"}),
-        ("docs", {".md"}),
+        ("docs", {".md", ".html"}),
         (".github/workflows", {".yml", ".yaml"}),
         (".github/ISSUE_TEMPLATE", {".yml", ".yaml"}),
     ):

@@ -10,6 +10,7 @@ from PIL import Image
 from .attributes import ClassMapAttributes
 from .benchmark import benchmark
 from .compare import compare_regions
+from .comparison_view import render_comparison_html
 from .config import RegionConfig
 from .evaluate import evaluate, read_instances
 from .io import check_wall_contract, read_mask, read_result, save_result
@@ -56,6 +57,9 @@ def main() -> None:
     compare.add_argument("--after", type=Path, required=True)
     compare.add_argument("--output", type=Path, required=True)
     compare.add_argument(
+        "--html-output", type=Path, help="Optional self-contained local visual review report"
+    )
+    compare.add_argument(
         "--fail-on",
         nargs="+",
         choices=("reshaped", "split", "merge", "reorganized", "appeared", "disappeared"),
@@ -66,14 +70,21 @@ def main() -> None:
     if args.command == "compare":
         try:
             inputs = (args.before, args.after)
-            same_path = args.output.resolve() in {path.resolve() for path in inputs}
-            same_file = args.output.exists() and any(args.output.samefile(path) for path in inputs)
+            outputs = [args.output] + ([args.html_output] if args.html_output else [])
+            for index, output in enumerate(outputs):
+                for other in (*inputs, *outputs[:index]):
+                    if output.resolve() == other.resolve() or (
+                        output.exists() and other.exists() and output.samefile(other)
+                    ):
+                        parser.error(
+                            "comparison outputs must differ from input maps and each other"
+                        )
+                if output.is_dir():
+                    parser.error("comparison output must be a file, not a directory")
             before = read_instances(args.before)
             after = read_instances(args.after)
         except (ValueError, OSError, KeyError, TypeError, EOFError, BadZipFile) as error:
             parser.error(f"cannot read comparison inputs: {error}")
-        if same_path or same_file:
-            parser.error("comparison output must differ from both input maps")
         try:
             report = compare_regions(before, after)
         except ValueError as error:
@@ -82,11 +93,15 @@ def main() -> None:
         triggered = [kind for kind in selected if report["summary"]["group_counts"][kind]]
         report["review_gate"] = {"fail_on": selected, "triggered": triggered}
         try:
-            args.output.parent.mkdir(parents=True, exist_ok=True)
+            html = render_comparison_html(before, after, report) if args.html_output else None
+            for output in outputs:
+                output.parent.mkdir(parents=True, exist_ok=True)
+            if html is not None:
+                args.html_output.write_text(html, encoding="utf-8")
             args.output.write_text(
                 json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8"
             )
-        except OSError as error:
+        except (OSError, ValueError) as error:
             parser.error(f"cannot write comparison report: {error}")
         print(json.dumps({"summary": report["summary"], "review_gate": report["review_gate"]}))
         if triggered:
