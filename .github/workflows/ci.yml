@@ -27,3 +27,9 @@ jobs:
       - run: python tools/build_showcase.py --check
       - run: python tools/release.py --check
       - run: python -m build
+      - name: Test the unpacked source distribution
+        run: |
+          package_dir=$(mktemp -d)
+          tar -xzf dist/planregions-*.tar.gz -C "$package_dir"
+          cd "$package_dir"/planregions-*
+          PYTHONPATH=src python -m pytest
