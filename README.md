@@ -2,7 +2,11 @@
 
 **See the room changes your pixel score hides.**
 
+For developers comparing floor-plan model outputs or reviewing drawing edits. Start here when the decision is “did rooms merge, split, or leak outside?” and pixel overlap alone cannot answer it.
+
 [Open the interactive demo](https://crown-sports.github.io/planregions/) · [Compare your own labels](docs/visual-review.md) · [Project introduction](docs/promotion.md)
+
+[Choose a package and run one shared workflow](https://github.com/crown-sports/planportals/blob/main/docs/workflow.md) · [Evidence and product boundaries](docs/product.md)
 
 > One missing wall pixel. Two rooms become one.
 > In a generated example, wall-mask IoU remains **98.94%** while the region count changes **2 → 1**. Explore the inner-wall and outer-wall cases in your browser before installing anything. This is a controlled geometry example, not a recognition benchmark.
@@ -13,7 +17,7 @@ A room outline may contain columns, courtyards, and obstacles. PlanRegions turns
 
 It also shows what changed between two runs: which regions merged, split, disappeared, or gained excluded pixels. Use it when building a drawing-review interface, testing a model upgrade, or inspecting manual edits. [Use cases](docs/use-cases.md) connect these capabilities to concrete tasks.
 
-With 0.3.0, open those changes in a **local interactive HTML report**: click a region or change group, filter merges and disappearances, and inspect both maps and their pixel accounting together. No server or neural model is needed for comparison; generated reports make no network requests.
+Open those changes in a **local interactive HTML report**: click a region or change group, filter merges and disappearances, and inspect both maps and their pixel accounting together. No server or neural model is needed for comparison; generated reports make no network requests.
 
 **Status: experimental geometry toolkit.** Geometry runs without a neural model. Region types remain unknown unless you provide semantic evidence. No real drawings, annotation datasets, or trained models are included; the demo generates a simple layout in memory.
 
