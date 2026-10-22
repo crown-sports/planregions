@@ -1,62 +1,35 @@
 # PlanRegions
 
-**See the room changes your pixel score hides.**
+Find rooms that merged, split or disappeared between two floor-plan results.
 
-For developers comparing floor-plan model outputs or reviewing drawing edits. Start here when the decision is “did rooms merge, split, or leak outside?” and pixel overlap alone cannot answer it.
+[中文](README.zh-CN.md) · [Interactive demo](https://crown-sports.github.io/planregions/) · [v0.4.0](https://github.com/crown-sports/planregions/releases/tag/v0.4.0)
 
-[Open the interactive demo](https://crown-sports.github.io/planregions/) · [Compare your own labels](docs/visual-review.md) · [Project introduction](docs/promotion.md)
+![Five colored regions before a wall gap, four after; the two upper regions merge](examples/workflow.png)
 
-[Choose a package and run one shared workflow](https://github.com/crown-sports/planportals/blob/main/docs/workflow.md) · [Evidence and product boundaries](docs/product.md)
+Generated example: removing the red-boxed wall section joins living and kitchen, changing **5 regions to 4**. [Run this example](https://github.com/crown-sports/planportals/blob/main/docs/workflow.md).
 
-> One missing wall pixel. Two rooms become one.
-> In a generated example, wall-mask IoU remains **98.94%** while the region count changes **2 → 1**. Explore the inner-wall and outer-wall cases in your browser before installing anything. This is a controlled geometry example, not a recognition benchmark.
+## Try it
 
-[中文](README.zh-CN.md) · [Use cases](docs/use-cases.md) · [Compare regions](docs/comparison.md) · [Research roadmap](docs/research-roadmap.md) · [Validation](docs/validation.md) · [Releases](https://github.com/crown-sports/planregions/releases)
-
-A room outline may contain columns, courtyards, and obstacles. PlanRegions turns an aligned wall mask into region instances that retain those holes, with exact pixel areas, interior points, and explicit merge operations. Run it independently or use the documented output of [WallGraph](https://github.com/crown-sports/wallgraph).
-
-It also shows what changed between two runs: which regions merged, split, disappeared, or gained excluded pixels. Use it when building a drawing-review interface, testing a model upgrade, or inspecting manual edits. [Use cases](docs/use-cases.md) connect these capabilities to concrete tasks.
-
-Open those changes in a **local interactive HTML report**: click a region or change group, filter merges and disappearances, and inspect both maps and their pixel accounting together. No server or neural model is needed for comparison; generated reports make no network requests.
-
-**Status: experimental geometry toolkit.** Geometry runs without a neural model. Region types remain unknown unless you provide semantic evidence. No real drawings, annotation datasets, or trained models are included; the demo generates a simple layout in memory.
-
-## Problem and approach
-
-Wall pixels do not directly answer how many regions exist or whether columns and courtyards belong to usable space. Filling outlines may fill obstacles. Door openings can connect rooms; a gap in an outer wall can connect an entire interior to the outside. A region's shape alone cannot establish its semantic use.
-
-PlanRegions separates barrier construction, partitioning, attribute assignment, and export. It excludes border-connected exterior before partitioning, retains polygon holes, and accepts explicit footprints or separator lines where the application supplies that evidence. Connected components are the default. Distance watershed is optional and can oversegment noisy predicted walls.
-
-Partition and attribute strategies are separate, so adding semantics does not silently redraw the regions. The instance map remains the common source for area, polygons, and merges. Configuration records which barriers and partition method were used.
-
-## Core technical choices
-
-| Choice | What it makes usable |
-| --- | --- |
-| Exterior exclusion before partitioning | Consistent outside handling, with explicit footprints for open boundaries |
-| One valid marker per maximum plateau | Fewer artificial seeds on flat room ridges; watershed remains optional because real predicted walls oversegment |
-| Pixel-driven polygons and explicit merging | Retained holes and barriers, recomputed geometry, and recorded ID mappings |
-| ID-independent instance evaluation | Compact IDs, background-aware intersection counts, and one-to-one assignment |
-| Multi-to-multi change diagnosis | Trace overlap groups and background flow without needing ground truth or matching IDs |
-
-The [method references](docs/methods.md) connect contour hierarchy to Suzuki's border-following work, watershed to the library's documented lineage, assignment to SciPy's Jonker–Volgenant variant, and PQ to [Panoptic Segmentation](https://arxiv.org/abs/1801.00868). They explain the differences from the original protocols. [Reproduction notes](docs/reproduction.md) describe exterior leakage, plateau seeds, same-wall controls, and the severe watershed oversegmentation seen in real tests. The contribution is the independent implementation and explicit geometry contracts.
-
-## Install and run
-
-Requires Python 3.10 or newer. Releases are on GitHub; no PyPI package is currently published.
+Python 3.10+. No model is needed for region geometry or comparison.
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
 python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.4.0"
 planregions demo --output runs/demo
 ```
 
-Alternatively, install the wheel from [v0.4.0](https://github.com/crown-sports/planregions/releases/tag/v0.4.0). See [release instructions](docs/releasing.md) for SHA-256 verification. The demo produces three regions. The repository contains no image files; its in-memory geometry matches WallGraph's single generated demo drawing.
+This smaller standalone demo creates three regions. Open `runs/demo/regions.png`; use `labels.npz` for exact instance IDs and `regions.json` for pixel areas, polygons and interior points.
 
-## Find which regions changed
+To process your own wall mask:
 
-Compare the integer outputs of two runs on the same original pixel grid:
+```bash
+planregions detect --walls /private/walls.png --output runs/regions
+```
+
+255 means wall and 0 means background; use `--wall-value 0` for black walls. Add `--wall-metadata /private/walls.json` to check a WallGraph export's size and coordinate contract.
+
+## Compare two runs
+
+Use integer label maps on the same original pixel grid:
 
 ```bash
 planregions compare --before runs/before/labels.npz \
@@ -64,123 +37,22 @@ planregions compare --before runs/before/labels.npz \
   --html-output runs/review/changes.html
 ```
 
-The report identifies unchanged or reshaped regions, splits, merges, many-to-many reorganizations, appearances, and disappearances. It also counts pixels entering or leaving background. Renumbering alone is unchanged. Add `--fail-on merge disappeared` to write the report and exit 1 when those observations need review. Invalid comparison inputs exit 2. Changes do not establish which prediction is correct.
+Open `changes.html` locally. Click a region or change group to inspect both maps and the affected pixel counts. The report finds merges, splits, disappearances and background changes; renumbering alone is unchanged. It makes no network requests.
 
-Open `changes.html` directly in your browser. Its bounded nearest-neighbor previews may omit small features; statistics use the complete original-resolution comparison. The HTML contains your label previews and statistics: keep it alongside your private results. See the [visual review guide](docs/visual-review.md).
+Add `--fail-on merge disappeared` to save the report and exit **1** when those changes occur. Invalid input exits **2**. For several drawings, `compare-batch` writes per-case reports and a shared summary; see the [comparison guide](docs/comparison.md).
 
-A [generated one-pixel example](docs/comparison.md#reproduce-the-one-pixel-example) retains wall IoU 0.98936 while two regions merge or one disappears. Run it locally to see why wall overlap and room structure need separate checks. The [comparison guide](docs/comparison.md) explains the exact overlap policy, report fields, and practical limits; the [research roadmap](docs/research-roadmap.md) sets out continuity and opening experiments.
+## What the regions mean
 
-For your own binary mask:
+The default pipeline removes border-connected exterior and partitions the remaining free pixels. It retains holes such as columns and courtyards. An outer-wall gap can make an interior disappear into the exterior; supply a footprint or explicit separators when the drawing needs them. Watershed is optional and can oversegment.
 
-```bash
-planregions detect --walls /private/walls.png --output runs/regions
-```
+Areas count labeled pixels. Simplified polygons may have different areas; coordinates are image pixels, not geographic coordinates. Names in the figure are supplied annotations. Without semantic input, room types stay unknown. Without a scale, areas stay in pixels.
 
-Wall is 255 and background is 0. Set `--wall-value 0` explicitly for black-wall/white-background masks. Grayscale masks are rejected; threshold them deliberately before use. All inputs use original image pixel coordinates.
+A change report shows what changed, not which result is correct. In the private evaluation, same-wall PQ improvement was inconclusive and the new full pipeline regressed. [Results](docs/results.md) · [Validation](docs/validation.md).
 
-With both packages installed:
+## More
 
-```bash
-wallgraph demo --output runs/walls
-planregions detect --walls runs/walls/walls.png \
-  --wall-metadata runs/walls/walls.json --output runs/regions
-```
+[Local review guide](docs/visual-review.md) · [Geometry and input options](docs/use-cases.md) · [Implementation notes](docs/product.md) · [Methods](docs/methods.md) · [Architecture](docs/architecture.md)
 
-`--wall-metadata` validates `wallgraph/1`, dimensions, coordinates, and wall polarity. WallGraph is optional and is not an installation dependency.
+[Contributing](CONTRIBUTING.md) · [Release checks](docs/releasing.md) · [Security](SECURITY.md)
 
-## Review a complete model change
-
-Available in v0.4.0; install the release above to use this command.
-
-Create a JSONL manifest with one aligned pair per drawing; paths are relative to the
-manifest, and each `id` is unique:
-
-```json
-{"id":"apartment-a","before":"old/a.npz","after":"new/a.npz"}
-{"id":"apartment-b","before":"old/b.npz","after":"new/b.npz"}
-```
-
-```bash
-planregions compare-batch --manifest /private/pairs.jsonl --output runs/batch-review.json \
-  --fail-on merge disappeared --max-background-loss-fraction 0.05
-```
-
-The report retains each comparison, input digests, flagged case IDs and exact pixel
-flow. A case triggers the loss gate when the fraction of its original region pixels
-that became background is **greater than** the threshold. Exit 0 means no requested
-gate triggered, 1 means review is needed, and 2 means invalid input or a failed case.
-Unreadable cases remain visible while other pairs are processed; they never count
-as passes. This reviews structural change, not prediction correctness.
-
-## Output and geometry contracts
-
-| File | Meaning |
-| --- | --- |
-| `regions.json` | `planregions/1` instances, polygons, attributes, proximity edges, configuration, timings, and merge operations |
-| `labels.npz` | Exact int32 instance IDs; 0 is wall, exterior, or filtered space |
-| `regions.polygons.json` | FeatureCollection-shaped polygons in the image pixel plane |
-| `regions.png` | Color preview, not the authoritative instance map |
-
-Coordinates have an upper-left origin, x right, y down. Areas count instance pixels; simplified contour area can differ. `centroid` is the pixel centroid and may lie outside a concave or holed region. `interior_point` is a region pixel selected using distance to the boundary. Bounding boxes use an inclusive upper-left and exclusive lower-right corner. There is no inferred physical scale or geographic coordinate system.
-
-Proximity edges always have `kind: spatial_proximity`. They express geometric closeness, not evidence of a door or a traversable connection.
-
-```python
-from pathlib import Path
-from planregions import RegionConfig, RegionPipeline
-from planregions.io import read_mask
-from planregions.operations import merge_regions
-
-walls = read_mask(Path("/private/walls.png"))
-result = RegionPipeline(RegionConfig(min_area=64)).run(walls)
-# Group existing instances if IDs 1 and 2 are present.
-merged = merge_regions(result, [[1, 2]])
-```
-
-Merging preserves wall/excluded pixels and holes, supports disjoint MultiPolygons, recomputes geometry, and records the operation. It groups instances rather than removing barriers. Conflicting semantic labels become unknown; matching labels' coverage is weighted by pixel area.
-
-## Open boundaries and optional semantics
-
-Use `--footprint /private/footprint.png` for an application-supplied building footprint, with 255 inside. Without one, a room connected to the image boundary is excluded and can be lost. Separator JSON is an array of original-coordinate endpoint pairs, for example `[[[90, 10], [90, 90]]]`; pass it through `--separators`. Closing is disabled by default. Optional splitting uses `--watershed --peak-distance 20` and needs independent validation.
-
-An aligned class map or an external CPU ONNX adapter can assign attributes. Explicit class-name mapping and minimum majority coverage are required; the default does not infer room names from shape.
-
-```bash
-python -m pip install "planregions[onnx] @ git+https://github.com/crown-sports/planregions.git@v0.4.0"
-planregions detect --walls /private/walls.png --image /private/plan.png \
-  --attribute-model /private/attributes.onnx --class-names /private/class-names.json \
-  --attribute-color rgb --min-coverage 0.6 --output runs/attributes
-planregions merge --input runs/regions --groups /private/merge-groups.json \
-  --output runs/merged
-```
-
-The ONNX adapter uses a persistent CPU session, float32 NCHW three-channel input scaled to 0–1, direct nearest-neighbor resize, and multiclass segmentation scores. Select RGB/BGR explicitly and ensure preprocessing matches training. The original RGB image must align with the wall mask. `attribute.confidence` is majority class coverage inside an instance, not a model probability or measured semantic accuracy. Unmapped or insufficiently covered classes remain unknown.
-
-## What the experiments show
-
-A frozen test sample of 30 annotated drawings contained 322 ground-truth region instances. Instance matching used class-agnostic IoU ≥ 0.5 in original coordinates.
-
-| Input and region method | Macro PQ | Macro instance F1 |
-| --- | ---: | ---: |
-| Legacy wall + legacy region API | 0.68034 | 0.75300 |
-| Same legacy wall + new connected components | 0.69868 | 0.75786 |
-| New selected wall + new connected components | 0.56580 | 0.61474 |
-| New selected wall + optional watershed | 0.29763 | 0.36960 |
-
-With the same wall input, the mean PQ difference was +1.83 percentage points, with 95% interval [−0.69, +4.35]; this does not establish stable improvement or noninferiority. The new full pipeline regressed by 11.45 points. Watershed produced 1,273 predicted instances against 322 ground truth. Geometry with ground-truth wall input is a diagnostic, not automatic recognition accuracy. No business semantic ground truth was available. See [validation](docs/validation.md) for controls, matching definitions, uncertainty, and failure mechanisms.
-
-## Evaluate, contribute, and cite
-
-Keep datasets outside the repository. Evaluation JSONL contains `walls`, `instances`, `group`, and optional `footprint`; paths resolve relative to the manifest. Instance truth is a 2D integer PNG or NPZ with a `labels` array: 0 excluded, positive integers instance IDs.
-
-```bash
-planregions evaluate --manifest /private/test.jsonl --output /private/reports/regions.json
-planregions benchmark --manifest /private/benchmark.jsonl --warmup 1 --repeats 3 \
-  --output /private/reports/latency.json
-```
-
-Evaluation reports instance F1/PQ, not semantic accuracy. Benchmark records have `walls` and optional `image`/`footprint`; timings exclude file I/O and upstream wall inference.
-
-See [CONTRIBUTING](CONTRIBUTING.md), [community conduct](CODE_OF_CONDUCT.md), [security reporting](SECURITY.md), and [release procedure](docs/releasing.md). CI checks Python 3.10/3.12, geometry and model contracts, formatting, buildability, and the public-file allowlist. `CITATION.cff` provides a software citation; there is no accompanying research publication.
-
-MIT applies to the new repository code. External models, datasets, and dependencies retain their licenses. Read [NOTICE](NOTICE.md) for provenance and boundaries.
+MIT for code and the generated figure. No real drawings, annotations or weights are distributed. [Provenance](NOTICE.md).

@@ -1,15 +1,13 @@
-# Where PlanRegions fits
+# Region geometry notes
 
-**User and decision:** a developer reviewing masks or a model change needs to know whether rooms merge, split or disappear before accepting the output. Start with the [browser example](https://crown-sports.github.io/planregions/), then compare your own aligned integer maps. Room extraction and comparison do not require a neural model.
+[README](../README.md) · [中文](../README.zh-CN.md)
 
-| Current, checkable value | Evidence | Boundary |
-| --- | --- | --- |
-| Keep exterior and courtyard/column holes out of region area | [`pipeline.py`](../src/planregions/pipeline.py), [`test_regions.py`](../tests/test_regions.py) | Open exterior boundaries need a supplied footprint; geometry does not establish room use |
-| Compare overlap groups without relying on matching instance IDs | [`compare.py`](../src/planregions/compare.py), [`test_compare.py`](../tests/test_compare.py) | Same original grid required; a change does not prove either run is correct |
-| Retain failed cases and gate structural/background loss across a manifest | [`compare_batch.py`](../src/planregions/compare_batch.py), [`test_compare_batch.py`](../tests/test_compare_batch.py) | Thresholds are caller policies, not universal quality standards |
+The default pipeline treats wall pixels as barriers, removes free space connected to the image border and labels the remaining components. A hole in an outer wall can therefore remove a whole interior. Use an explicit footprint or separator when the drawing requires one; the pipeline does not guess that every opening is a door. [Pipeline](../src/planregions/pipeline.py) · [Partitioning](../src/planregions/partition.py).
 
-Use connected components or [scikit-image watershed](https://scikit-image.org/docs/stable/auto_examples/segmentation/plot_watershed.html) directly for a small segmentation experiment. PlanRegions adds common exterior/area/export contracts and review reports. Use [Shapely](https://github.com/shapely/shapely) for general vector geometry; it is complementary to the pixel-instance bookkeeping here. Neither library is claimed to be slower or less accurate. A general image model can provide masks, but its textual room count does not replace an aligned map that can be compared and audited.
+The label map is the source for area, polygons and merging. Area counts pixels; simplified polygon area can differ. Holes remain excluded. An explicit instance merge groups regions without demolishing the wall between them. [Geometry and merge tests](../tests/test_regions.py).
 
-The [validation record](validation.md) and [reproduction notes](reproduction.md) include severe watershed oversegmentation. The browser's one-pixel case is a controlled example, not an end-to-end recognition benchmark. [Run a shared measurement/change/closure example](https://github.com/crown-sports/planportals/blob/main/docs/workflow.md) to inspect the contracts across packages.
+Comparison uses pixel overlaps between two maps, not matching ID numbers. It records groups that split, merge, appear or disappear, plus flow to and from background. A changed number alone is not a room change. [Comparison](../src/planregions/compare.py) · [Tests](../tests/test_compare.py).
 
-**Next priorities:** collect permissioned opening/exterior failure cases and reviewer corrections, then compare structural changes with task-level correctness on held-out drawings. Current value comes from tested bookkeeping and visible failure modes. No proprietary dataset, recognition advantage or proven adoption barrier is established; these are development priorities, not present capabilities.
+The README figure comes from the [shared generated example](https://github.com/crown-sports/planportals/blob/main/docs/workflow.md). It colors actual labels before and after removing part of a separator, with stable colors for overlapping groups. Room names are supplied annotations. The [local HTML report](visual-review.md) lets you inspect your own changes.
+
+Geometry does not establish room use or which prediction is correct. Attributes remain unknown without semantic input. Watershed can oversegment; the [validation record](validation.md) explains why connected components remain the default and where the full evaluated pipeline regressed.
