@@ -138,3 +138,10 @@ python tools/release.py --output dist/planregions-source.zip
 公开发布工具只打包白名单源码、文档与测试，不打包模型、图片、数据和结果。新实现采用 MIT；外部数据/权重和依赖使用各自的许可，见 [NOTICE](NOTICE.md)。
 
 协作规范见 [CONTRIBUTING](CONTRIBUTING.md)、[行为准则](CODE_OF_CONDUCT.md)、[安全报告](SECURITY.md) 和 [发布流程](docs/releasing.md)。`CITATION.cff` 提供软件引用信息。
+
+## 批次结构回归检查
+
+源码版新增 `planregions compare-batch --manifest /private/pairs.jsonl --output runs/batch-review.json --fail-on merge disappeared --max-background-loss-fraction 0.05`。
+每行 JSON 包含唯一 `id`、`before`、`after`，相对路径以 manifest 目录为准。
+输出逐图变化、摘要和输入哈希；无法读取的样本显式计错，不会被当作通过。返回码 0 表示未触发门禁，
+1 表示需要复核，2 表示输入或样本错误。比较变化不等于判断预测正确。

@@ -84,6 +84,30 @@ planregions detect --walls runs/walls/walls.png \
 
 `--wall-metadata` validates `wallgraph/1`, dimensions, coordinates, and wall polarity. WallGraph is optional and is not an installation dependency.
 
+## Review a complete model change
+
+Available from a source checkout; existing tagged releases do not include this command.
+
+Create a JSONL manifest with one aligned pair per drawing; paths are relative to the
+manifest, and each `id` is unique:
+
+```json
+{"id":"apartment-a","before":"old/a.npz","after":"new/a.npz"}
+{"id":"apartment-b","before":"old/b.npz","after":"new/b.npz"}
+```
+
+```bash
+planregions compare-batch --manifest /private/pairs.jsonl --output runs/batch-review.json \
+  --fail-on merge disappeared --max-background-loss-fraction 0.05
+```
+
+The report retains each comparison, input digests, flagged case IDs and exact pixel
+flow. A case triggers the loss gate when the fraction of its original region pixels
+that became background is **greater than** the threshold. Exit 0 means no requested
+gate triggered, 1 means review is needed, and 2 means invalid input or a failed case.
+Unreadable cases remain visible while other pairs are processed; they never count
+as passes. This reviews structural change, not prediction correctness.
+
 ## Output and geometry contracts
 
 | File | Meaning |

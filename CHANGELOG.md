@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add manifest-driven `compare-batch` with per-drawing structural gates, background-loss budgets, full comparisons, content digests and explicit failed-case accounting.
+
 ## 0.3.0 — 2026-10-08
 
 - Add a self-contained local HTML change-review report with synchronized label previews, change filters, selection and full-resolution pixel accounting.
