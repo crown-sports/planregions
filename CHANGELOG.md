@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0 — 2026-10-22
+- Include the required `.gitignore` in source distributions and verify the unpacked archive in CI.
+- Preserve one-pass Python iterables for review gates, preventing a generator of change kinds from silently disabling checks.
+- Add manifest-driven `compare-batch` with per-drawing structural gates, background-loss budgets, full comparisons, content digests and explicit failed-case accounting.
+
 ## 0.3.0 — 2026-10-08
 
 - Add a self-contained local HTML change-review report with synchronized label previews, change filters, selection and full-resolution pixel accounting.

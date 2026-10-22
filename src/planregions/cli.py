@@ -10,6 +10,7 @@ from PIL import Image
 from .attributes import ClassMapAttributes
 from .benchmark import benchmark
 from .compare import compare_regions
+from .compare_batch import CHANGE_KINDS, compare_batch
 from .comparison_view import render_comparison_html
 from .config import RegionConfig
 from .evaluate import evaluate, read_instances
@@ -66,7 +67,30 @@ def main() -> None:
         default=[],
         help="Write the report, then exit 1 if any chosen change kind occurs",
     )
+    batch = commands.add_parser("compare-batch", help="Review a JSONL manifest of label-map pairs")
+    batch.add_argument("--manifest", type=Path, required=True)
+    batch.add_argument("--output", type=Path, required=True)
+    batch.add_argument("--fail-on", nargs="+", choices=CHANGE_KINDS, default=[])
+    batch.add_argument("--max-background-loss-fraction", type=float)
     args = parser.parse_args()
+    if args.command == "compare-batch":
+        try:
+            report = compare_batch(
+                args.manifest,
+                fail_on=tuple(args.fail_on),
+                output=args.output,
+                max_background_loss_fraction=args.max_background_loss_fraction,
+            )
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8"
+            )
+        except (ValueError, OSError, TypeError, UnicodeError) as error:
+            parser.error(str(error))
+        print(json.dumps({"summary": report["summary"], "review_gate": report["review_gate"]}))
+        if report["review_gate"]["exit_code"]:
+            raise SystemExit(report["review_gate"]["exit_code"])
+        return
     if args.command == "compare":
         try:
             inputs = (args.before, args.after)

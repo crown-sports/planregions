@@ -34,3 +34,16 @@ Tag the exact commit whose Python 3.10/3.12 CI passed. Create a draft experiment
 The checks workflow supports manual runs with `gh workflow run ci.yml --repo crown-sports/planregions --ref main`. Confirm that both Python jobs passed on the exact commit being released; a successful run on an older commit does not validate the release.
 
 CI uses read-only repository permissions and actions pinned by full commit SHA. Keep release permissions out of routine pull-request jobs. See [GitHub community guidance](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/about-community-profiles-for-public-repositories), [release management](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository), and [Actions security](https://docs.github.com/en/actions/reference/security/secure-use).
+
+## v0.4.0 compatibility
+
+This release adds commands without changing the existing input/export schemas.
+Install the pinned tag with `python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.4.0"`,
+or use the matching release wheel. This is a GitHub experimental pre-release;
+no PyPI upload or pretrained-model download is configured.
+
+Build artifacts from a clean export of the exact reviewed release commit into a
+new output directory. Do not reuse a previous release's `dist/` files. Verify
+package metadata and imported `__version__` from the wheel in a fresh environment,
+then record SHA-256 checksums only for that version's wheel, sdist and audited
+source ZIP. Existing tags and assets retain their original contents.

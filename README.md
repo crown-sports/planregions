@@ -44,11 +44,11 @@ Requires Python 3.10 or newer. Releases are on GitHub; no PyPI package is curren
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.3.0"
+python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.4.0"
 planregions demo --output runs/demo
 ```
 
-Alternatively, install the wheel from [v0.3.0](https://github.com/crown-sports/planregions/releases/tag/v0.3.0). See [release instructions](docs/releasing.md) for SHA-256 verification. The demo produces three regions. The repository contains no image files; its in-memory geometry matches WallGraph's single generated demo drawing.
+Alternatively, install the wheel from [v0.4.0](https://github.com/crown-sports/planregions/releases/tag/v0.4.0). See [release instructions](docs/releasing.md) for SHA-256 verification. The demo produces three regions. The repository contains no image files; its in-memory geometry matches WallGraph's single generated demo drawing.
 
 ## Find which regions changed
 
@@ -84,6 +84,30 @@ planregions detect --walls runs/walls/walls.png \
 
 `--wall-metadata` validates `wallgraph/1`, dimensions, coordinates, and wall polarity. WallGraph is optional and is not an installation dependency.
 
+## Review a complete model change
+
+Available in v0.4.0; install the release above to use this command.
+
+Create a JSONL manifest with one aligned pair per drawing; paths are relative to the
+manifest, and each `id` is unique:
+
+```json
+{"id":"apartment-a","before":"old/a.npz","after":"new/a.npz"}
+{"id":"apartment-b","before":"old/b.npz","after":"new/b.npz"}
+```
+
+```bash
+planregions compare-batch --manifest /private/pairs.jsonl --output runs/batch-review.json \
+  --fail-on merge disappeared --max-background-loss-fraction 0.05
+```
+
+The report retains each comparison, input digests, flagged case IDs and exact pixel
+flow. A case triggers the loss gate when the fraction of its original region pixels
+that became background is **greater than** the threshold. Exit 0 means no requested
+gate triggered, 1 means review is needed, and 2 means invalid input or a failed case.
+Unreadable cases remain visible while other pairs are processed; they never count
+as passes. This reviews structural change, not prediction correctness.
+
 ## Output and geometry contracts
 
 | File | Meaning |
@@ -118,7 +142,7 @@ Use `--footprint /private/footprint.png` for an application-supplied building fo
 An aligned class map or an external CPU ONNX adapter can assign attributes. Explicit class-name mapping and minimum majority coverage are required; the default does not infer room names from shape.
 
 ```bash
-python -m pip install "planregions[onnx] @ git+https://github.com/crown-sports/planregions.git@v0.3.0"
+python -m pip install "planregions[onnx] @ git+https://github.com/crown-sports/planregions.git@v0.4.0"
 planregions detect --walls /private/walls.png --image /private/plan.png \
   --attribute-model /private/attributes.onnx --class-names /private/class-names.json \
   --attribute-color rgb --min-coverage 0.6 --output runs/attributes
