@@ -3,6 +3,7 @@
 import hashlib
 import json
 import math
+from collections.abc import Iterable
 from pathlib import Path
 from zipfile import BadZipFile
 
@@ -15,7 +16,7 @@ CHANGE_KINDS = ("reshaped", "split", "merge", "reorganized", "appeared", "disapp
 def compare_batch(
     manifest: Path,
     *,
-    fail_on: tuple[str, ...] = (),
+    fail_on: Iterable[str] = (),
     max_background_loss_fraction: float | None = None,
     output: Path | None = None,
 ) -> dict:
@@ -25,7 +26,13 @@ def compare_batch(
     against *all* inputs before anything is written by the caller.
     """
     manifest = Path(manifest)
-    if isinstance(fail_on, str) or any(kind not in CHANGE_KINDS for kind in fail_on):
+    if isinstance(fail_on, (str, bytes)):
+        raise ValueError("fail_on must be an iterable of change kinds")
+    try:
+        fail_on = tuple(fail_on)
+    except TypeError as error:
+        raise ValueError("fail_on must be an iterable of change kinds") from error
+    if any(kind not in CHANGE_KINDS for kind in fail_on):
         raise ValueError("fail_on contains an unknown change kind")
     if max_background_loss_fraction is not None and (
         isinstance(max_background_loss_fraction, bool)

@@ -4,8 +4,8 @@ type: software
 title: PlanRegions
 authors:
   - name: "PlanRegions contributors"
-version: 0.3.0
-date-released: 2026-10-08
+version: 0.4.0
+date-released: 2026-10-22
 repository-code: "https://github.com/crown-sports/planregions"
 url: "https://github.com/crown-sports/planregions"
 license: MIT

@@ -44,11 +44,11 @@ planregions compare --before runs/before/labels.npz \
 从 GitHub 安装已发布的版本：
 
 ```bash
-python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.3.0"
+python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.4.0"
 planregions demo --output runs/demo
 ```
 
-也可下载 [Release 中的 wheel](https://github.com/crown-sports/planregions/releases/tag/v0.3.0) 并校验 SHA256。以下开发安装命令在克隆本仓库后执行：
+也可下载 [Release 中的 wheel](https://github.com/crown-sports/planregions/releases/tag/v0.4.0) 并校验 SHA256。以下开发安装命令在克隆本仓库后执行：
 
 ```bash
 python -m venv .venv
@@ -141,7 +141,7 @@ python tools/release.py --output dist/planregions-source.zip
 
 ## 批次结构回归检查
 
-源码版新增 `planregions compare-batch --manifest /private/pairs.jsonl --output runs/batch-review.json --fail-on merge disappeared --max-background-loss-fraction 0.05`。
+v0.4.0 新增 `planregions compare-batch --manifest /private/pairs.jsonl --output runs/batch-review.json --fail-on merge disappeared --max-background-loss-fraction 0.05`。
 每行 JSON 包含唯一 `id`、`before`、`after`，相对路径以 manifest 目录为准。
 输出逐图变化、摘要和输入哈希；无法读取的样本显式计错，不会被当作通过。返回码 0 表示未触发门禁，
 1 表示需要复核，2 表示输入或样本错误。比较变化不等于判断预测正确。

@@ -89,3 +89,14 @@ def test_cli_outputs_report_before_failure_and_keeps_inputs(tmp_path):
     command[command.index(str(output))] = str(path)
     assert subprocess.run(command, capture_output=True).returncode == 2
     assert path.read_bytes() == before
+
+
+def test_single_pass_gate_iterables_are_not_silently_consumed(tmp_path):
+    path = manifest(tmp_path)
+    expected = compare_batch(path, fail_on=("merge", "disappeared"))
+    actual = compare_batch(path, fail_on=iter(("merge", "disappeared")))
+    assert actual == expected
+    assert actual["review_gate"]["exit_code"] == 1
+    for invalid in ("merge", b"merge", None, 1):
+        with pytest.raises(ValueError, match="iterable"):
+            compare_batch(path, fail_on=invalid)

@@ -44,11 +44,11 @@ Requires Python 3.10 or newer. Releases are on GitHub; no PyPI package is curren
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.3.0"
+python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.4.0"
 planregions demo --output runs/demo
 ```
 
-Alternatively, install the wheel from [v0.3.0](https://github.com/crown-sports/planregions/releases/tag/v0.3.0). See [release instructions](docs/releasing.md) for SHA-256 verification. The demo produces three regions. The repository contains no image files; its in-memory geometry matches WallGraph's single generated demo drawing.
+Alternatively, install the wheel from [v0.4.0](https://github.com/crown-sports/planregions/releases/tag/v0.4.0). See [release instructions](docs/releasing.md) for SHA-256 verification. The demo produces three regions. The repository contains no image files; its in-memory geometry matches WallGraph's single generated demo drawing.
 
 ## Find which regions changed
 
@@ -86,7 +86,7 @@ planregions detect --walls runs/walls/walls.png \
 
 ## Review a complete model change
 
-Available from a source checkout; existing tagged releases do not include this command.
+Available in v0.4.0; install the release above to use this command.
 
 Create a JSONL manifest with one aligned pair per drawing; paths are relative to the
 manifest, and each `id` is unique:
@@ -142,7 +142,7 @@ Use `--footprint /private/footprint.png` for an application-supplied building fo
 An aligned class map or an external CPU ONNX adapter can assign attributes. Explicit class-name mapping and minimum majority coverage are required; the default does not infer room names from shape.
 
 ```bash
-python -m pip install "planregions[onnx] @ git+https://github.com/crown-sports/planregions.git@v0.3.0"
+python -m pip install "planregions[onnx] @ git+https://github.com/crown-sports/planregions.git@v0.4.0"
 planregions detect --walls /private/walls.png --image /private/plan.png \
   --attribute-model /private/attributes.onnx --class-names /private/class-names.json \
   --attribute-color rgb --min-coverage 0.6 --output runs/attributes
