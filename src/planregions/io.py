@@ -49,13 +49,18 @@ def read_mask(path: Path, wall_value: int = 255) -> np.ndarray:
 
 def check_wall_contract(metadata: Path, shape: tuple[int, int], wall_value: int) -> None:
     data = json.loads(metadata.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("wall metadata must be a JSON object")
     if data.get("schema_version") != "wallgraph/1":
         raise ValueError("unsupported wall schema")
     if data.get("image") != {"height": shape[0], "width": shape[1]}:
         raise ValueError("wall metadata dimensions do not match mask")
     if data.get("coordinates") != {"origin": "top_left", "x": "right", "y": "down", "unit": "px"}:
         raise ValueError("wall coordinate convention is incompatible")
-    if data.get("mask", {}).get("wall_value") != wall_value:
+    mask = data.get("mask", {})
+    if not isinstance(mask, dict):
+        raise ValueError("wall mask metadata must be a JSON object")
+    if mask.get("wall_value") != wall_value:
         raise ValueError("wall polarity does not match metadata")
 
 

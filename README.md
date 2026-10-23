@@ -17,6 +17,8 @@ python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.4.
 planregions demo --output runs/demo
 ```
 
+Keep original inputs in a separate folder. Reusing an output folder replaces its generated result files.
+
 This smaller standalone demo creates three regions. Open `runs/demo/regions.png`; use `labels.npz` for exact instance IDs and `regions.json` for pixel areas, polygons and interior points.
 
 To process your own wall mask:

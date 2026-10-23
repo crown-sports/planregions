@@ -17,6 +17,8 @@ python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.4.
 planregions demo --output runs/demo
 ```
 
+原始输入与结果请分开放；重复使用同一个输出目录，会替换其中生成的结果文件。
+
 这个较小的独立 demo 生成三个区域。打开 `runs/demo/regions.png` 看预览；精确实例编号在 `labels.npz`，像素面积、多边形和区域内点在 `regions.json`。
 
 处理自己的墙体掩码：
