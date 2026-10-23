@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1 — 2026-10-23 (prerelease)
+
+- Refuse detect outputs that would overwrite supplied masks, metadata or attribute inputs, including hard links and symlinks.
+- Report ordinary input and output errors with exit code 2 instead of a traceback.
+
 ## 0.4.0 — 2026-10-22
 - Include the required `.gitignore` in source distributions and verify the unpacked archive in CI.
 - Preserve one-pass Python iterables for review gates, preventing a generator of change kinds from silently disabling checks.

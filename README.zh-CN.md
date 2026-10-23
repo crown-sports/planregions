@@ -2,7 +2,7 @@
 
 比较两版户型结果，找出合并、拆分或消失的房间。
 
-[English](README.md) · [交互演示](https://crown-sports.github.io/planregions/) · [v0.4.0](https://github.com/crown-sports/planregions/releases/tag/v0.4.0)
+[English](README.md) · [交互演示](https://crown-sports.github.io/planregions/) · [v0.4.1](https://github.com/crown-sports/planregions/releases/tag/v0.4.1)
 
 ![缺墙前有五个彩色区域，缺墙后上方两间连成一个，变成四个区域](examples/workflow.png)
 
@@ -13,9 +13,11 @@
 Python 3.10+。区域几何和前后比较都不需要模型。
 
 ```bash
-python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.4.0"
+python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.4.1"
 planregions demo --output runs/demo
 ```
+
+原始输入与结果请分开放；重复使用同一个输出目录，会替换其中生成的结果文件。
 
 这个较小的独立 demo 生成三个区域。打开 `runs/demo/regions.png` 看预览；精确实例编号在 `labels.npz`，像素面积、多边形和区域内点在 `regions.json`。
 

@@ -1,5 +1,6 @@
 import argparse
 import json
+import sys
 from pathlib import Path
 from zipfile import BadZipFile
 
@@ -21,7 +22,21 @@ from .partition import WatershedPartition
 from .pipeline import RegionPipeline
 
 
-def main() -> None:
+def _protect_inputs(output: Path, names: tuple[str, ...], sources: tuple[Path | None, ...]) -> None:
+    for name in names:
+        target = output / name
+        for source in sources:
+            if source is not None and (
+                target.resolve() == source.resolve()
+                or (target.exists() and source.exists() and target.samefile(source))
+            ):
+                raise ValueError(
+                    f"output {target} would overwrite input {source}; "
+                    "choose a different --output directory"
+                )
+
+
+def _main() -> None:
     parser = argparse.ArgumentParser(description="Extract regions from an aligned wall mask")
     commands = parser.add_subparsers(dest="command", required=True)
     for name in ("detect", "demo", "evaluate", "benchmark"):
@@ -192,6 +207,20 @@ def main() -> None:
         )
         print(json.dumps(report))
         return
+    _protect_inputs(
+        args.output,
+        ("labels.npz", "regions.png", "regions.json", "regions.polygons.json"),
+        (
+            args.walls,
+            args.wall_metadata,
+            args.image,
+            args.footprint,
+            args.separators,
+            args.class_map,
+            args.class_names,
+            args.attribute_model,
+        ),
+    )
     walls = read_mask(args.walls, args.wall_value)
     if args.wall_metadata:
         check_wall_contract(args.wall_metadata, walls.shape, args.wall_value)
@@ -207,6 +236,14 @@ def main() -> None:
     result = pipeline.run(walls, rgb=rgb, footprint=footprint, separators=separators)
     save_result(result, args.output)
     print(json.dumps({"region_count": len(result.regions), "metadata": result.metadata}))
+
+
+def main() -> None:
+    try:
+        _main()
+    except (ValueError, OSError, TypeError, KeyError, EOFError, BadZipFile) as error:
+        print(f"planregions: {error}", file=sys.stderr)
+        raise SystemExit(2) from None
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 Find rooms that merged, split or disappeared between two floor-plan results.
 
-[中文](README.zh-CN.md) · [Interactive demo](https://crown-sports.github.io/planregions/) · [v0.4.0](https://github.com/crown-sports/planregions/releases/tag/v0.4.0)
+[中文](README.zh-CN.md) · [Interactive demo](https://crown-sports.github.io/planregions/) · [v0.4.1](https://github.com/crown-sports/planregions/releases/tag/v0.4.1)
 
 ![Five colored regions before a wall gap, four after; the two upper regions merge](examples/workflow.png)
 
@@ -13,9 +13,11 @@ Generated example: removing the red-boxed wall section joins living and kitchen,
 Python 3.10+. No model is needed for region geometry or comparison.
 
 ```bash
-python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.4.0"
+python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.4.1"
 planregions demo --output runs/demo
 ```
+
+Keep original inputs in a separate folder. Reusing an output folder replaces its generated result files.
 
 This smaller standalone demo creates three regions. Open `runs/demo/regions.png`; use `labels.npz` for exact instance IDs and `regions.json` for pixel areas, polygons and interior points.
 
