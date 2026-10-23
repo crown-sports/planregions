@@ -5,7 +5,10 @@ import re
 import zipfile
 from pathlib import Path
 
+from PIL import Image
+
 ROOT = Path(__file__).resolve().parents[1]
+PUBLIC_IMAGES = {"examples/workflow.png"}
 TOP_LEVEL = {
     "README.md",
     "README.zh-CN.md",
@@ -36,6 +39,7 @@ def public_files() -> list[Path]:
         ("tests", {".py"}),
         ("tools", {".py"}),
         ("docs", {".md", ".html"}),
+        ("examples", {".png"}),
         (".github/workflows", {".yml", ".yaml"}),
         (".github/ISSUE_TEMPLATE", {".yml", ".yaml"}),
     ):
@@ -55,6 +59,16 @@ def public_files() -> list[Path]:
     for path in files:
         if path.is_symlink() or not path.is_file():
             raise ValueError("required public file missing or symlinked")
+        if path.suffix == ".png":
+            if path.relative_to(ROOT).as_posix() not in PUBLIC_IMAGES:
+                raise ValueError("only reviewed demo images can be published")
+            with Image.open(path) as image:
+                if max(image.size) > 2048:
+                    raise ValueError("demo image is larger than the public limit")
+                if image.format != "PNG" or image.mode != "RGB" or image.info:
+                    raise ValueError("demo image must be RGB PNG with no metadata")
+                image.load()
+            continue
         source = path.read_text(encoding="utf-8")
         if any(re.search(pattern, source) for pattern in PATTERNS):
             raise ValueError(f"private-looking content: {path.relative_to(ROOT)}")

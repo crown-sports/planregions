@@ -7,7 +7,7 @@ PlanRegions is currently distributed through GitHub experimental prereleases, no
 - A Python wheel (`.whl`) for installation; pip installs dependencies separately.
 - `SHA256SUMS` for the three archives.
 
-No image files, real datasets, annotations, sample lists, trained models, per-drawing results, private credentials, or legacy Git history are published. GitHub also generates source archives for each tag.
+Only the original generated `examples/workflow.png` is allowed as an image. No real datasets, annotations, sample lists, trained models, per-drawing results, private credentials, or legacy Git history are published. GitHub also generates source archives for each tag.
 
 ## Prepare a version
 
@@ -47,3 +47,5 @@ new output directory. Do not reuse a previous release's `dist/` files. Verify
 package metadata and imported `__version__` from the wheel in a fresh environment,
 then record SHA-256 checksums only for that version's wheel, sdist and audited
 source ZIP. Existing tags and assets retain their original contents.
+
+The exact image path is checked by `PUBLIC_IMAGES`, with an RGB PNG, 2048-pixel size limit and no metadata. Other images are rejected.

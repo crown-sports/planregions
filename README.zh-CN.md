@@ -1,35 +1,35 @@
 # PlanRegions
 
-**模型更新以后，哪些房间悄悄变了？**
+比较两版户型结果，找出合并、拆分或消失的房间。
 
-面向比较模型版本、复核图纸修改的开发者。要判断“房间是否合并、拆分或漏到室外”，而像素重合率不能直接回答时，从这里开始。
+[English](README.md) · [交互演示](https://crown-sports.github.io/planregions/) · [v0.4.0](https://github.com/crown-sports/planregions/releases/tag/v0.4.0)
 
-[打开交互演示](https://crown-sports.github.io/planregions/) · [本地复核自己的结果](docs/visual-review.zh-CN.md) · [项目介绍与宣传文案](docs/promotion.zh-CN.md)
+![缺墙前有五个彩色区域，缺墙后上方两间连成一个，变成四个区域](examples/workflow.png)
 
-[四库选择与完整试用：测量、结构变化、封门](https://github.com/crown-sports/planportals/blob/main/docs/workflow.zh-CN.md) · [实现证据与产品边界](docs/product.md)
+生成示例：移除红框内的一段隔墙，客厅和厨房连在一起，区域数量从 **5 变成 4**。[运行这张示例](https://github.com/crown-sports/planportals/blob/main/docs/workflow.zh-CN.md)。
 
-> 一个墙像素缺失，两个房间就合并了。
-> 在程序生成的示例中，墙体掩码 IoU 仍有 **98.94%**，区域数量却从 **2 变成 1**。安装前就能在浏览器切换内墙、外墙缺口，看到它们如何影响区域。这是受控几何演示，不代表真实识别精度。
+## 先跑起来
 
-[English](README.md) · [使用场景](docs/use-cases.zh-CN.md) · [变化诊断](docs/comparison.zh-CN.md) · [研究路线](docs/research-roadmap.zh-CN.md) · [完整验证](docs/validation.md) · [发布版本](https://github.com/crown-sports/planregions/releases)
+Python 3.10+。区域几何和前后比较都不需要模型。
 
-一个房间的轮廓里可能有柱子和庭院，两个区域合并后，这些孔洞也应当留下。PlanRegions 从墙体掩码建立区域实例，让多边形、像素面积、区域内点和合并操作始终有同一份标签图可以核对。它可独立运行，也可读取 WallGraph 输出。
+```bash
+python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.4.0"
+planregions demo --output runs/demo
+```
 
-它还可以比较两次结果，指出哪些区域合并、分裂或消失，以及哪些像素流入了背景。做图纸复核界面、验证模型升级或检查人工编辑时，这些具体变化能帮助你决定看哪里。接入方法见[使用场景](docs/use-cases.zh-CN.md)。
+这个较小的独立 demo 生成三个区域。打开 `runs/demo/regions.png` 看预览；精确实例编号在 `labels.npz`，像素面积、多边形和区域内点在 `regions.json`。
 
-可生成**本地交互 HTML 复核报告**：点击区域或变化组，同步突出前后对应，筛选合并与消失，直接看像素账目。比较不需要服务器或神经模型，生成的报告没有网络请求。
+处理自己的墙体掩码：
 
-**当前状态：实验几何工具库。** 默认几何划分不需要神经模型，房间属性在缺少语义证据时保持未知。相同墙体输入的 PQ 改善尚不显著，新完整两阶段流程仍有退步；真实数据和外部模型保持私有。
+```bash
+planregions detect --walls /private/walls.png --output runs/regions
+```
 
-## 背景与问题
+255 表示墙、0 表示背景；黑墙加 `--wall-value 0`。WallGraph 输出可加 `--wall-metadata /private/walls.json`，检查尺寸和坐标约定是否一致。
 
-墙体像素不能直接回答“这里有几个区域”“柱子和庭院是否属于可用空间”“区域是否可以合并”等问题。简单填充轮廓可能把内部障碍物填掉；门洞会让多个房间连为一个区域；仅凭狭长形状给区域命名，也容易把办公室错误地当成走廊。
+## 比较两版结果
 
-PlanRegions 将几何划分、语义赋值和结果导出分为独立模块。默认先排除连接到图像边缘的外部空间，再从非墙体像素的连通域获得候选区域，并保留孔洞。没有语义证据时输出未知属性。门洞和开放空间通过显式分隔线、建筑范围掩码或可选分水岭策略处理，每种操作都记录参数。
-
-## 找到受改动影响的区域
-
-将同一原图网格上的两份整数标签图交给比较命令：
+两份整数标签图必须位于同一个原图像素网格：
 
 ```bash
 planregions compare --before runs/before/labels.npz \
@@ -37,115 +37,22 @@ planregions compare --before runs/before/labels.npz \
   --html-output runs/review/changes.html
 ```
 
-报告给出未变、形状变化、分裂、合并、多对多重组、出现和消失，并保留区域与背景之间的像素流量。单纯换编号不会算成变化。加上 `--fail-on merge disappeared`，程序会先保存报告，再在需要复核时退出 1；比较输入不合法时退出 2。变化本身不能说明哪一版更准确。
+在本地打开 `changes.html`，点击区域或变化组，同时查看前后图和受影响的像素数量。报告能指出合并、拆分、消失和背景变化，单纯换编号不会算成变化；报告不发网络请求。
 
-用浏览器直接打开 `changes.html`。最近邻预览可能漏掉大图中的细小结构，统计仍使用完整分辨率结果。HTML 包含标签缩略图和逐区域统计，保存在自己的私有结果目录即可；详见[交互复核指南](docs/visual-review.zh-CN.md)。
+加 `--fail-on merge disappeared` 后，遇到这些变化会先保存报告，再退出 **1**；输入不合法退出 **2**。多张图可用 `compare-batch` 生成逐图报告和汇总，见[比较说明](docs/comparison.zh-CN.md)。
 
-[一个墙像素的构造示例](docs/comparison.zh-CN.md#复现一个墙像素的影响)中，墙体 IoU 仍有 0.98936，两间区域却可能连成一间，或其中一间消失。你可以本地复现，查看具体编号和像素账目。[变化诊断说明](docs/comparison.zh-CN.md)解释完整契约；[研究路线](docs/research-roadmap.zh-CN.md)说明怎样继续验证墙体连续性和开口语义。
+## 这些区域代表什么
 
-## 快速开始
+默认先排除与图像边缘连通的外部空间，再划分剩余非墙像素，保留柱子、庭院等孔洞。外墙漏一段，内部也可能被当成室外；这种图需要提供建筑范围或显式分隔线。分水岭可选，但可能过分割。
 
-从 GitHub 安装已发布的版本：
+面积按标签像素计数，简化后的多边形面积可能不同；坐标是图像像素，不是经纬度。图中的房间名称来自提供的标注；没有语义输入时，房间类型保持未知。没有比例尺时，不输出平方米。
 
-```bash
-python -m pip install "git+https://github.com/crown-sports/planregions.git@v0.4.0"
-planregions demo --output runs/demo
-```
+变化报告说明哪里变了，不能说明哪版更准。私有评估中，相同墙体条件下的 PQ 改善不显著，新完整流程仍有退步。[结果](docs/results.md) · [验证](docs/validation.md)。
 
-也可下载 [Release 中的 wheel](https://github.com/crown-sports/planregions/releases/tag/v0.4.0) 并校验 SHA256。以下开发安装命令在克隆本仓库后执行：
+## 继续看
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -e '.[dev]'
-planregions demo --output runs/demo
-planregions detect --walls /private/walls.png --output runs/regions
-```
+[本地交互复核](docs/visual-review.zh-CN.md) · [几何与输入选项](docs/use-cases.zh-CN.md) · [实现说明](docs/product.md) · [方法](docs/methods.zh-CN.md) · [架构](docs/architecture.md)
 
-本工程不提交任何数据图片。`demo` 在内存中生成一张简单三房间示意图，与 WallGraph 的公开简单图具有相同几何；它仅用于检查接口。真实图片、标注、模型、分类映射和逐张结果由使用者在仓库外管理。
+[贡献](CONTRIBUTING.md) · [发布检查](docs/releasing.md) · [安全报告](SECURITY.md)
 
-输入墙体掩码中 255 是墙、0 是背景。旧系统的黑墙白底图需显式使用 `--wall-value 0`。如果提供 `--wall-metadata walls.json`，会检查 WallGraph 的 schema、尺寸、坐标约定和墙体极性，拒绝元数据声明不兼容的输入；实际像素对齐仍由调用方保证。
-
-```bash
-# 安装 WallGraph 与 PlanRegions 后的两阶段联用
-wallgraph detect --image /private/plan.png --model /private/wall.onnx \
-  --output /private/walls
-planregions detect --walls /private/walls/walls.png \
-  --wall-metadata /private/walls/walls.json --output /private/regions
-```
-
-输出包含 `regions.json`、`labels.npz`、`regions.png` 与 `regions.polygons.json`。NPZ 保存精确 int32 实例 ID，0 表示墙体、外部空间或被过滤的像素；PNG 只是预览。多边形使用原图像素坐标，含闭合外环与内孔；polygon JSON 是平面坐标的 FeatureCollection 结构，不是经纬度 GeoJSON。
-
-面积是实例像素数量；轮廓由像素中心和简化容差构造，轮廓面积可能和像素计数不同。`centroid` 是像素质心，在凹形区域或带孔区域中可能落在区域外；`interior_point` 是距离边界最远的区域像素，保证在区域内部。bbox 为左上角闭区间、右下角开区间。没有比例尺时不输出平方米面积。
-
-## 技术难点与工程贡献
-
-| 难点 | 处理方式 | 边界 |
-| --- | --- | --- |
-| 外部空间泄漏 | 默认排除触边连通域；支持显式 footprint | 外墙开口时可能丢弃整个内部区域，需要范围输入 |
-| 开放区域与门洞 | 可配置分隔线；可选基于距离的分水岭 | 分水岭可能过分割，不默认猜测门洞 |
-| 柱子、庭院与内部孔洞 | 用轮廓层级生成多边形内环；像素图作为面积依据 | 简化后的轮廓与像素面积不同 |
-| 语义标签缺少依据 | 属性策略单独注入；类别映射显式提供；覆盖率不足时保持未知 | 覆盖率不是分类概率，也不表示语义正确率 |
-| 合并与拓扑混淆 | 合并保留墙体和孔洞；不相连区域可输出 MultiPolygon；语义冲突变为未知 | 这是实例分组，不是拆墙或证明房间可互通 |
-| 任意实例编号影响评估 | 使用 IoU 矩阵和一对一匹配评估实例 | 需要独立人工标注；不能用预测结果作为真值 |
-
-核心工作集中在划分前排除外部、平坦距离平台的有效种子、孔洞保留和像素依据不变的显式合并。轮廓、分水岭和指派求解使用成熟库；PQ 借鉴 [Panoptic Segmentation](https://arxiv.org/abs/1801.00868)，同时明确本工程无类别、阈值包含等号等差异。[方法与论文](docs/methods.zh-CN.md) 将这些依据对应到源码。
-
-[复现实跑笔记](docs/reproduction.zh-CN.md) 讲清同一墙体对照的用途，以及外部泄漏、长房间重复播种和真实预测墙体上的过分割。验证集比较决定默认使用连通域；冻结后的 30 张标注测试中，相同旧墙体的 PQ 差值区间跨零，新完整流程的 PQ 下降。见 [设计](docs/architecture.md) 与 [结果](docs/results.md)。
-
-## 可替换策略
-
-```python
-from planregions import RegionPipeline, RegionConfig
-from planregions.partition import WatershedPartition
-from planregions.operations import merge_regions
-
-# walls 为用户自己的 2D 二值掩码，255 表示墙
-pipeline = RegionPipeline(RegionConfig(min_area=64))
-result = pipeline.run(walls)
-# 合并既有实例；不改变墙体和外部像素
-merged = merge_regions(result, [[1, 2]])
-```
-
-对于外墙开口图，提供 `--footprint /private/footprint.png`，255 表示建筑范围。手动分隔线文件为 JSON 数组，每项包含两个 `[x, y]` 端点；端点必须在原图内，例如 `[[[90, 10], [90, 90]]]`。使用 `--separators` 注入；几何分水岭通过 `--watershed --peak-distance 20` 开启。默认 `--close-radius 0`，避免自动闭合真实开口。
-
-语义策略可接受对齐的 class map，或外部 ONNX 模型。类别名称 JSON 的 key 为模型类别 ID、value 为标签名；只映射确认语义的类别。ONNX 支持 float32 NCHW 三通道输入与多类分割输出，输入直接缩放到模型尺寸（当前适配器使用最近邻），通道顺序通过 `--attribute-color rgb/bgr` 指定。
-
-```bash
-python -m pip install -e '.[onnx]'
-planregions detect --walls /private/walls.png --image /private/plan.png \
-  --attribute-model /private/attributes.onnx --class-names /private/class-names.json \
-  --attribute-color rgb --min-coverage 0.6 --output /private/regions
-planregions merge --input /private/regions --groups /private/merge-groups.json \
-  --output /private/merged
-```
-
-语义模型会话复用，当前仅使用 CPU，原图必须与墙体掩码同尺寸。`attribute.confidence` 表示该区域中多数类别占比，不是模型概率；类别无映射或多数占比不足则输出未知。邻近边的 `kind` 固定为 `spatial_proximity`，不代表存在门、可通行或具备业务关联。
-
-## 私有评估与发布
-
-评估 manifest 为 JSONL，每行包含 `walls`、`instances`、`group`，可选 `footprint`。路径相对于 manifest，也可以为绝对路径。人工实例标注使用二维整数 PNG 或带 `labels` 数组的 NPZ：0 为排除区域、其他正数为实例 ID。运行以下命令获得 IoU 阈值 0.5 的实例 F1 和 PQ；这评估给定墙体掩码上的区域几何，不包含语义准确率。
-
-```bash
-planregions evaluate --manifest /private/test.jsonl --output /private/reports/regions.json
-# 无标注性能实测：manifest 每行提供 walls，以及可选 image / footprint
-planregions benchmark --manifest /private/benchmark.jsonl --warmup 1 --repeats 3 \
-  --output /private/reports/latency.json
-ruff check .
-ruff format --check .
-pytest
-python tools/release.py --check
-python -m build
-python tools/release.py --output dist/planregions-source.zip
-```
-
-公开发布工具只打包白名单源码、文档与测试，不打包模型、图片、数据和结果。新实现采用 MIT；外部数据/权重和依赖使用各自的许可，见 [NOTICE](NOTICE.md)。
-
-协作规范见 [CONTRIBUTING](CONTRIBUTING.md)、[行为准则](CODE_OF_CONDUCT.md)、[安全报告](SECURITY.md) 和 [发布流程](docs/releasing.md)。`CITATION.cff` 提供软件引用信息。
-
-## 批次结构回归检查
-
-v0.4.0 新增 `planregions compare-batch --manifest /private/pairs.jsonl --output runs/batch-review.json --fail-on merge disappeared --max-background-loss-fraction 0.05`。
-每行 JSON 包含唯一 `id`、`before`、`after`，相对路径以 manifest 目录为准。
-输出逐图变化、摘要和输入哈希；无法读取的样本显式计错，不会被当作通过。返回码 0 表示未触发门禁，
-1 表示需要复核，2 表示输入或样本错误。比较变化不等于判断预测正确。
+代码与生成图使用 MIT 许可，不分发真实图纸、标注或权重。[来源说明](NOTICE.md)。
